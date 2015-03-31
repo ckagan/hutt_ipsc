@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<!-- saved from url=(0014)about:internet -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>Hutterite iPSC Panel</title>
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 12px;
+   margin: 8px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 { 
+   font-size:2.2em; 
+}
+
+h2 { 
+   font-size:1.8em; 
+}
+
+h3 { 
+   font-size:1.4em; 
+}
+
+h4 { 
+   font-size:1.0em; 
+}
+
+h5 { 
+   font-size:0.9em; 
+}
+
+h6 { 
+   font-size:0.8em; 
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre {	
+   margin-top: 0;
+   max-width: 95%;
+   border: 1px solid #ccc;
+   white-space: pre-wrap;
+}
+
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code.r, code.cpp {
+   background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * { 
+      background: transparent !important; 
+      color: black !important; 
+      filter:none !important; 
+      -ms-filter: none !important; 
+   }
+
+   body { 
+      font-size:12pt; 
+      max-width:100%; 
+   }
+       
+   a, a:visited { 
+      text-decoration: underline; 
+   }
+
+   hr { 
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote { 
+      padding-right: 1em; 
+      page-break-inside: avoid; 
+   }
+
+   tr, img { 
+      page-break-inside: avoid; 
+   }
+
+   img { 
+      max-width: 100% !important; 
+   }
+
+   @page :left { 
+      margin: 15mm 20mm 15mm 10mm; 
+   }
+     
+   @page :right { 
+      margin: 15mm 10mm 15mm 20mm; 
+   }
+
+   p, h2, h3 { 
+      orphans: 3; widows: 3; 
+   }
+
+   h2, h3 { 
+      page-break-after: avoid; 
+   }
+}
+
+</style>
+
+<!-- Styles for R syntax highlighter -->
+<style type="text/css">
+   pre .operator,
+   pre .paren {
+     color: rgb(104, 118, 135)
+   }
+
+   pre .literal {
+     color: rgb(88, 72, 246)
+   }
+
+   pre .number {
+     color: rgb(0, 0, 205);
+   }
+
+   pre .comment {
+     color: rgb(76, 136, 107);
+   }
+
+   pre .keyword {
+     color: rgb(0, 0, 255);
+   }
+
+   pre .identifier {
+     color: rgb(0, 0, 0);
+   }
+
+   pre .string {
+     color: rgb(3, 106, 7);
+   }
+</style>
+
+<!-- R syntax highlighter -->
+<script type="text/javascript">
+var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
+hljs.initHighlightingOnLoad();
+</script>
+
+
+
+
+</head>
+
+<body>
+<h1>Hutterite iPSC Panel</h1>
+
+<p>This is the workflow used for QC, pluritest, and initial analysis on the 73 Hutterite iPSC samples and 11 heart samples (dox experiment). To generate final covariates including Pluri score and novelty we start with running pluritest. Start with script Clean_Pluritest_iPSCArray.R</p>
+
+<pre><code class="r">setwd(&quot;~/Arrays/Hutt iPSCs&quot;)
+load(&quot;C:/Users/Courtney/Dropbox/LCL-iPSC/Pluritestsub_REnvironment.unk&quot;)
+sample.names = &#39;Sample_names.txt&#39;
+arraydata = &#39;YGilad-CK-Mar6-15-ProbeLevelData-NotNormalized-NoBGSubtracted-FinalReport.txt&#39;
+# load packages
+require(lumi)
+</code></pre>
+
+<pre><code>## Warning: replacing previous import &#39;image&#39; when loading &#39;graphics&#39;
+</code></pre>
+
+<pre><code>## Warning: replacing previous import &#39;nleqslv&#39; when loading &#39;nleqslv&#39;
+</code></pre>
+
+<pre><code class="r">require(xtable)
+</code></pre>
+
+<pre><code>## Warning: package &#39;xtable&#39; was built under R version 3.0.3
+</code></pre>
+
+<pre><code class="r">require(GO.db)
+</code></pre>
+
+<pre><code>## Warning: package &#39;DBI&#39; was built under R version 3.0.3
+</code></pre>
+
+<pre><code class="r"># set the stage
+samplenames &lt;- readLines(file(sample.names))
+#IMPORT RAW DATA WITH LUMI
+working.lumi&lt;-lumiR(arraydata, convertNuID = FALSE, annotationColumn=&quot;PROBE_ID&quot;)
+</code></pre>
+
+<pre><code>## Warning: closing unused connection 5 (Sample_names.txt)
+</code></pre>
+
+<pre><code>## Perform Quality Control assessment of the LumiBatch object ...
+</code></pre>
+
+<pre><code class="r">sampleNames(working.lumi) &lt;- samplenames
+#identify probe ID column
+probeind &lt;-match(&quot;PROBE_ID&quot;, colnames(fData(working.lumi)))
+fData(working.lumi)[,probeind]&lt;-gsub(&quot;\&quot;&quot;,&quot;&quot;,fData(working.lumi)[,probeind])
+#RSN NORMALIZATION OF THE DATA
+A &lt;- fData(working.lumi)[,probeind]  #matches on ILMN_Ids for lumi/RSN
+B &lt;- fData(H9targetArray)[,1] #for matches on ILMN_Ids for lumi/RSN
+sel.match &lt;- match(B,A)
+working.lumi &lt;- working.lumi[sel.match[!is.na(sel.match)],] #subsets the exprSet user.lumi down to subsetuser.lumi to match H9 ref array rows
+working.lumi&lt;-lumiN(working.lumi,method=&quot;rsn&quot;,target=H9targetArray[is.na(sel.match)==FALSE,])
+</code></pre>
+
+<pre><code>## Perform rsn normalization ...
+## 2015-03-11 16:30:15 , processing array  1 
+## 2015-03-11 16:30:15 , processing array  2 
+## 2015-03-11 16:30:15 , processing array  3 
+## 2015-03-11 16:30:15 , processing array  4 
+## 2015-03-11 16:30:16 , processing array  5 
+## 2015-03-11 16:30:16 , processing array  6 
+## 2015-03-11 16:30:16 , processing array  7 
+## 2015-03-11 16:30:16 , processing array  8 
+## 2015-03-11 16:30:16 , processing array  9 
+## 2015-03-11 16:30:16 , processing array  10 
+## 2015-03-11 16:30:17 , processing array  11 
+## 2015-03-11 16:30:17 , processing array  12 
+## 2015-03-11 16:30:17 , processing array  13 
+## 2015-03-11 16:30:17 , processing array  14 
+## 2015-03-11 16:30:17 , processing array  15 
+## 2015-03-11 16:30:17 , processing array  16 
+## 2015-03-11 16:30:17 , processing array  17 
+## 2015-03-11 16:30:17 , processing array  18 
+## 2015-03-11 16:30:18 , processing array  19 
+## 2015-03-11 16:30:18 , processing array  20 
+## 2015-03-11 16:30:18 , processing array  21 
+## 2015-03-11 16:30:18 , processing array  22 
+## 2015-03-11 16:30:18 , processing array  23 
+## 2015-03-11 16:30:18 , processing array  24 
+## 2015-03-11 16:30:19 , processing array  25 
+## 2015-03-11 16:30:19 , processing array  26 
+## 2015-03-11 16:30:19 , processing array  27 
+## 2015-03-11 16:30:19 , processing array  28 
+## 2015-03-11 16:30:19 , processing array  29 
+## 2015-03-11 16:30:19 , processing array  30 
+## 2015-03-11 16:30:19 , processing array  31 
+## 2015-03-11 16:30:20 , processing array  32 
+## 2015-03-11 16:30:20 , processing array  33 
+## 2015-03-11 16:30:20 , processing array  34 
+## 2015-03-11 16:30:20 , processing array  35 
+## 2015-03-11 16:30:20 , processing array  36 
+## 2015-03-11 16:30:20 , processing array  37 
+## 2015-03-11 16:30:21 , processing array  38 
+## 2015-03-11 16:30:21 , processing array  39 
+## 2015-03-11 16:30:21 , processing array  40 
+## 2015-03-11 16:30:21 , processing array  41 
+## 2015-03-11 16:30:21 , processing array  42 
+## 2015-03-11 16:30:21 , processing array  43 
+## 2015-03-11 16:30:21 , processing array  44 
+## 2015-03-11 16:30:22 , processing array  45 
+## 2015-03-11 16:30:22 , processing array  46 
+## 2015-03-11 16:30:22 , processing array  47 
+## 2015-03-11 16:30:22 , processing array  48 
+## 2015-03-11 16:30:22 , processing array  49 
+## 2015-03-11 16:30:22 , processing array  50 
+## 2015-03-11 16:30:22 , processing array  51 
+## 2015-03-11 16:30:23 , processing array  52 
+## 2015-03-11 16:30:23 , processing array  53 
+## 2015-03-11 16:30:23 , processing array  54 
+## 2015-03-11 16:30:23 , processing array  55 
+## 2015-03-11 16:30:23 , processing array  56 
+## 2015-03-11 16:30:23 , processing array  57 
+## 2015-03-11 16:30:24 , processing array  58 
+## 2015-03-11 16:30:24 , processing array  59 
+## 2015-03-11 16:30:24 , processing array  60 
+## 2015-03-11 16:30:24 , processing array  61 
+## 2015-03-11 16:30:24 , processing array  62 
+## 2015-03-11 16:30:24 , processing array  63 
+## 2015-03-11 16:30:24 , processing array  64 
+## 2015-03-11 16:30:25 , processing array  65 
+## 2015-03-11 16:30:25 , processing array  66 
+## 2015-03-11 16:30:25 , processing array  67 
+## 2015-03-11 16:30:25 , processing array  68 
+## 2015-03-11 16:30:25 , processing array  69 
+## 2015-03-11 16:30:25 , processing array  70 
+## 2015-03-11 16:30:25 , processing array  71 
+## 2015-03-11 16:30:26 , processing array  72 
+## 2015-03-11 16:30:26 , processing array  73 
+## 2015-03-11 16:30:26 , processing array  74 
+## 2015-03-11 16:30:26 , processing array  75 
+## 2015-03-11 16:30:26 , processing array  76 
+## 2015-03-11 16:30:26 , processing array  77 
+## 2015-03-11 16:30:27 , processing array  78 
+## 2015-03-11 16:30:27 , processing array  79 
+## 2015-03-11 16:30:27 , processing array  80 
+## 2015-03-11 16:30:27 , processing array  81 
+## 2015-03-11 16:30:27 , processing array  82 
+## 2015-03-11 16:30:27 , processing array  83 
+## 2015-03-11 16:30:27 , processing array  84 
+## 2015-03-11 16:30:28 , processing array  85
+</code></pre>
+
+<pre><code class="r">#RSN NORMALIZATION OF THE DATA CONTINUED
+# assume that illumina Probe Ids are in fData[,1]
+A &lt;- fData(working.lumi)[,probeind]
+sel.match&lt;-match(rownames(W15),A)
+working.lumi.exprs &lt;- working.lumi@assayData$exprs
+rownames(working.lumi.exprs) &lt;- A
+#CALCULATION OF SCORES
+try(
+{
+sel&lt;-match(rownames(W15),A)
+coef&lt;-c(-1.267095e+02  ,4.567437e-03 , 4.377068e-03  ,1.043193e-03)
+working.lumi.int &lt;- working.lumi.exprs[sel[!is.na(sel)],]
+H15.new&lt;-predictH(working.lumi.int, W15[!is.na(sel),])
+H12.new&lt;-predictH(working.lumi.int, W12[!is.na(sel),])
+rss.new&lt;-apply((working.lumi.int - W12[!is.na(sel),]%*%H12.new)^2,2,sum)
+RMSE.new&lt;-sqrt(rss.new/sum(!is.na(sel)))
+novel.new&lt;-apply((working.lumi.int - W12[!is.na(sel),]%*%H12.new)^8,2,sum)
+novel.new&lt;-(novel.new/sum(!is.na(sel)))^(1/8)
+s.new&lt;-drop(coef[1] +coef[2:4]%*%H15.new[c(1,14,13),])
+print(s.new)
+}
+)
+</code></pre>
+
+<pre><code>##              16              21              25              43 
+##        24.26793        25.75893        27.55310        29.51692 
+##              46              61              62              67 
+##        27.15599        25.40323        26.82581        26.75365 
+##              73              69              22              23 
+##        24.30677        23.78727        21.59470        22.17941 
+##              20              18              33              36 
+##        26.32808        26.18923        27.81019        23.98461 
+##              44              45               5              54 
+##        26.38043        24.15399        28.00584        24.35104 
+##              64              10              12               8 
+##        28.57498        26.64190        28.58306        27.98423 
+##              19              27              41              38 
+##        23.86254        26.82777        28.09090        31.16365 
+##              55              52              57              63 
+##        27.08759        22.45290        27.96159        23.00697 
+##              59              74              70              26 
+##        20.48502        27.24430        25.03894        20.90056 
+##              30              40              37              50 
+##        27.67938        22.54953        30.31327        29.96805 
+##               1               4              58              65 
+##        24.14134        24.80727        27.71237        25.75511 
+##               7              68              11              15 
+##        22.57494        22.82942        23.18641        27.66332 
+##              35              32              39              48 
+##        33.30140        34.77234        33.37310        35.08889 
+##              47              72              24  HT14- 48h 1.25 
+##        32.44501        30.90049        28.95333       -36.35994 
+## HT14- 48H 0.625 HT14- 48H cont.     HT14- 48H 5   HT14- 48H 2.5 
+##       -52.86083       -43.63621       -61.07164       -60.52280 
+##              17              14               6              56 
+##        29.41440        29.52387        27.90030        30.31478 
+##              60              66    HT14- 48H 10 HT14- 96H cont. 
+##        32.31204        33.27983       -59.97656       -44.67679 
+## HT14- 96H 0.625  HT14- 96H 1.25   HT14- 96H 2.5     HT14- 96H 5 
+##       -45.81746       -65.97621       -61.62268       -64.34667 
+##              29              34              31              42 
+##        33.25744        28.91509        30.79135        31.69517 
+##              49               3               2              51 
+##        28.44490        24.60073        30.06947        32.29281 
+##              53              75               9              71 
+##        28.51089        24.24579        29.90078        27.05281
+</code></pre>
+
+<pre><code class="r"># plot MULTICLASS PLURITEST &amp; overview
+table.results&lt;-matrix(,nrow=ncol(exprs(working.lumi)),ncol=5)
+rownames(table.results)&lt;-colnames(exprs(working.lumi))
+colnames(table.results)&lt;-c(&quot;pluri-raw&quot;,&quot;pluri logit-p&quot;,&quot;novelty&quot;,&quot;novelty logit-p&quot;,&quot;RMSD&quot;)
+try(
+{
+print(s.new)
+pdf(&quot;Origin pluritest Plot.pdf&quot;)
+par(mar=c(12,4,4,2))
+par(xaxt=&#39;n&#39;)
+plot(s.new,main=&quot;pluripotency&quot;,xlab=&quot;&quot;,ylab=&quot;pluripotency&quot;,ylim=c(-130,70), cex = .6, pch = 20)
+abline(h=25.25,lty=&quot;dashed&quot;,col=&quot;red&quot;)
+abline(h=59.95,lty=&quot;dashed&quot;,col=&quot;red&quot;)
+abline(h=-28.92,lty=&quot;dashed&quot;,col=&quot;lightblue&quot;)
+abline(h=-130,lty=&quot;dashed&quot;,col=&quot;lightblue&quot;)
+par(xaxt=&#39;s&#39;)
+axis(1,at=c(1:length(s.new)),labels=names(s.new),las=2, cex.axis = .5)
+dev.off()
+}
+)
+</code></pre>
+
+<pre><code>##              16              21              25              43 
+##        24.26793        25.75893        27.55310        29.51692 
+##              46              61              62              67 
+##        27.15599        25.40323        26.82581        26.75365 
+##              73              69              22              23 
+##        24.30677        23.78727        21.59470        22.17941 
+##              20              18              33              36 
+##        26.32808        26.18923        27.81019        23.98461 
+##              44              45               5              54 
+##        26.38043        24.15399        28.00584        24.35104 
+##              64              10              12               8 
+##        28.57498        26.64190        28.58306        27.98423 
+##              19              27              41              38 
+##        23.86254        26.82777        28.09090        31.16365 
+##              55              52              57              63 
+##        27.08759        22.45290        27.96159        23.00697 
+##              59              74              70              26 
+##        20.48502        27.24430        25.03894        20.90056 
+##              30              40              37              50 
+##        27.67938        22.54953        30.31327        29.96805 
+##               1               4              58              65 
+##        24.14134        24.80727        27.71237        25.75511 
+##               7              68              11              15 
+##        22.57494        22.82942        23.18641        27.66332 
+##              35              32              39              48 
+##        33.30140        34.77234        33.37310        35.08889 
+##              47              72              24  HT14- 48h 1.25 
+##        32.44501        30.90049        28.95333       -36.35994 
+## HT14- 48H 0.625 HT14- 48H cont.     HT14- 48H 5   HT14- 48H 2.5 
+##       -52.86083       -43.63621       -61.07164       -60.52280 
+##              17              14               6              56 
+##        29.41440        29.52387        27.90030        30.31478 
+##              60              66    HT14- 48H 10 HT14- 96H cont. 
+##        32.31204        33.27983       -59.97656       -44.67679 
+## HT14- 96H 0.625  HT14- 96H 1.25   HT14- 96H 2.5     HT14- 96H 5 
+##       -45.81746       -65.97621       -61.62268       -64.34667 
+##              29              34              31              42 
+##        33.25744        28.91509        30.79135        31.69517 
+##              49               3               2              51 
+##        28.44490        24.60073        30.06947        32.29281 
+##              53              75               9              71 
+##        28.51089        24.24579        29.90078        27.05281
+</code></pre>
+
+<pre><code>## png 
+##   2
+</code></pre>
+
+<pre><code class="r">table.results[,1]&lt;-round(s.new,3)
+table.results[,2]&lt;-round(exp(s.new)/(1+exp(s.new)),3)
+table.results[,3]&lt;-round(novel.new,3)
+table.results[,5]&lt;-round(RMSE.new,3)
+</code></pre>
+
+<p>Pluritest figure:</p>
+
+<pre><code class="r">par(mar=c(12,4,4,2))
+par(xaxt=&#39;n&#39;)
+plot(s.new,main=&quot;pluripotency&quot;,xlab=&quot;&quot;,ylab=&quot;pluripotency&quot;,ylim=c(-130,70), cex = .6, pch = 20)
+abline(h=25.25,lty=&quot;dashed&quot;,col=&quot;red&quot;)
+abline(h=59.95,lty=&quot;dashed&quot;,col=&quot;red&quot;)
+abline(h=-28.92,lty=&quot;dashed&quot;,col=&quot;lightblue&quot;)
+abline(h=-130,lty=&quot;dashed&quot;,col=&quot;lightblue&quot;)
+par(xaxt=&#39;s&#39;)
+axis(1,at=c(1:length(s.new)),labels=names(s.new),las=2, cex.axis = .5)
+</code></pre>
+
+<p><img src="data:image/png;base64,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" alt="plot of chunk unnamed-chunk-2"/> </p>
+
+<p>Why is table.results[,2]&lt;-round(exp(s.new)/(1+exp(s.new)),3) the code to get the pluriscore 0/1? How is this being calculated? Is there a true cut-off value?</p>
+
+</body>
+
+</html>
+
