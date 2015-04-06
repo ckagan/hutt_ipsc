@@ -1,7 +1,9 @@
 Hutterite iPSC Panel
 ========================================================
 
-This is the workflow used for QC, pluritest, and initial analysis on the 73 Hutterite iPSC samples and 11 heart samples (dox experiment). To generate final covariates including Pluri score and novelty we start with running pluritest. Start with script Clean_Pluritest_iPSCArray.R
+This is the workflow used for QC, pluritest, and initial analysis on the 73 Hutterite iPSC samples and 11 heart samples (dox experiment). 
+
+To generate final covariates including Pluri score and novelty we start with running pluritest. 
 
 ```{r message = FALSE, results='hide'}
 setwd("~/Arrays/Hutt iPSCs")

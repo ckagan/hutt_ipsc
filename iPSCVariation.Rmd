@@ -1,0 +1,63 @@
+---
+title: "iPSC Variation"
+author: "Courtney Kagan"
+---
+Last updated: `r Sys.Date()`
+Code version: `r# system("git log -1 --format='%H'", intern = TRUE)`
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+setwd("~/Arrays/Hutt iPSCs")
+expr_gene = read.table('OriginGeneExpression_Normalized.txt', header=T, as.is=T, sep='\t', row.names=1)
+samplenames = read.table('Covars.txt', header=T, sep ='\t')
+samplenames = samplenames[order(samplenames$Order),]
+hearts = c(56:60,67:72)
+samplenames = samplenames[-hearts,]
+colnames(expr_gene) = samplenames$Sample
+
+plot(as.numeric(expr_gene["RAB17", ]), main = "RAB17 Expression")
+plot(as.numeric(expr_gene["NLRP2", ]), main = "NLRP2 Expression")
+plot(as.numeric(expr_gene["CRYZ", ]), main = "CRYZ Expression")
+plot(as.numeric(expr_gene["NNAT", ]), main = "NNAT Expression")
+plot(as.numeric(expr_gene["ACTA1", ]), main = "ACTA1 Expression")
+plot(as.numeric(expr_gene["LEFTY1", ]), main = "LEFTY1 Expression")
+plot(as.numeric(expr_gene["CDKN1A", ]), main = "CDKN1A Expression")
+plot(as.numeric(expr_gene["ZNF649", ]), main = "ZNF649 Expression")
+plot(as.numeric(expr_gene["CHURC1", ]), main = "CHURC1 Expression")
+
+##Pull Origin Project data
+setwd("C:/Users/Courtney/Dropbox/LCL-iPSC/Origin/")
+expr_gene2 = read.table('OriginGeneExpression_Normalized.txt', header=T, as.is=T, sep='\t', row.names=1)
+samplenames2 = read.table('covar.txt', header=T, sep ='\t')
+#Re-order samplenames based on array location
+samplenames2 = samplenames2[order(samplenames2$Order),]
+colnames(expr_gene2) = samplenames2$NewName
+expr_gene3 = expr_gene2[,grep ("LCL|Fib" , colnames(expr_gene2), invert = T)]
+plot(as.numeric(expr_gene3["ENSG00000124839", ]), main = "RAB17 Expression Origin")
+plot(as.numeric(expr_gene3["ENSG00000022556", ]), main = "NLRP2 Expression Origin")
+plot(as.numeric(expr_gene3["ENSG00000116791", ]), main = "CRYZ Expression")
+plot(as.numeric(expr_gene3["ENSG00000053438", ]), main = "NNAT Expression")
+plot(as.numeric(expr_gene3["ENSG00000143632", ]), main = "ACTA1 Expression")
+plot(as.numeric(expr_gene3["ENSG00000243709", ]), main = "LEFTY1 Expression")
+plot(as.numeric(expr_gene3["ENSG00000258289", ]), main = "CHURC1 Expression")
+
+expr_gene4 = expr_gene2[,grep ("LCL|Fib" , colnames(expr_gene2), invert = F)]
+plot(as.numeric(expr_gene4["ENSG00000124839", ]), main = "RAB17 Expression Origin")
+plot(as.numeric(expr_gene4["ENSG00000022556", ]), main = "NLRP2 Expression Origin")
+plot(as.numeric(expr_gene4["ENSG00000116791", ]), main = "CRYZ Expression")
+plot(as.numeric(expr_gene4["ENSG00000053438", ]), main = "NNAT Expression")
+plot(as.numeric(expr_gene4["ENSG00000143632", ]), main = "ACTA1 Expression")
+plot(as.numeric(expr_gene4["ENSG00000243709", ]), main = "LEFTY1 Expression")
+plot(as.numeric(expr_gene4["ENSG00000258289", ]), main = "CHURC1 Expression")
+```
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

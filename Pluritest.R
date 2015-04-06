@@ -1,20 +1,5 @@
----
-title: "Hutterite iPSC Panel QC"
-author: "Courtney Kagan"
----
+## Pluritest Code for generating files ###
 
-Last updated: `r Sys.Date()`
-
-Code version: `r# system("git log -1 --format='%H'", intern = TRUE)`
-
-This is the workflow used for pluritest, QC, and initial expression data analysis on the 73 Hutterite iPSC samples. 
-
-## Pluritest
-Set working directory on spudhead
-```bash
-cd /mnt/gluster/internal_supp/hutt_ipsc
-```
-```{r include=FALSE}
 setwd("~/Arrays/Hutt iPSCs")
 load("C:/Users/Courtney/Dropbox/LCL-iPSC/Pluritestsub_REnvironment.unk")
 sample.names = 'Sample_names.txt'
@@ -46,17 +31,17 @@ rownames(working.lumi.exprs) <- A
 #CALCULATION OF SCORES
 try(
 {
-sel<-match(rownames(W15),A)
-coef<-c(-1.267095e+02  ,4.567437e-03 , 4.377068e-03  ,1.043193e-03)
-working.lumi.int <- working.lumi.exprs[sel[!is.na(sel)],]
-H15.new<-predictH(working.lumi.int, W15[!is.na(sel),])
-H12.new<-predictH(working.lumi.int, W12[!is.na(sel),])
-rss.new<-apply((working.lumi.int - W12[!is.na(sel),]%*%H12.new)^2,2,sum)
-RMSE.new<-sqrt(rss.new/sum(!is.na(sel)))
-novel.new<-apply((working.lumi.int - W12[!is.na(sel),]%*%H12.new)^8,2,sum)
-novel.new<-(novel.new/sum(!is.na(sel)))^(1/8)
-s.new<-drop(coef[1] +coef[2:4]%*%H15.new[c(1,14,13),])
-print(s.new)
+  sel<-match(rownames(W15),A)
+  coef<-c(-1.267095e+02  ,4.567437e-03 , 4.377068e-03  ,1.043193e-03)
+  working.lumi.int <- working.lumi.exprs[sel[!is.na(sel)],]
+  H15.new<-predictH(working.lumi.int, W15[!is.na(sel),])
+  H12.new<-predictH(working.lumi.int, W12[!is.na(sel),])
+  rss.new<-apply((working.lumi.int - W12[!is.na(sel),]%*%H12.new)^2,2,sum)
+  RMSE.new<-sqrt(rss.new/sum(!is.na(sel)))
+  novel.new<-apply((working.lumi.int - W12[!is.na(sel),]%*%H12.new)^8,2,sum)
+  novel.new<-(novel.new/sum(!is.na(sel)))^(1/8)
+  s.new<-drop(coef[1] +coef[2:4]%*%H15.new[c(1,14,13),])
+  print(s.new)
 }
 )
 # plot MULTICLASS PLURITEST & overview
@@ -70,11 +55,7 @@ table.results[,2]<-round(exp(s.new)/(1+exp(s.new)),3)
 table.results[,3]<-round(novel.new,3)
 table.results[,5]<-round(RMSE.new,3)
 
-```
-
-All samples including 11 samples from a doxorubicin treatment and the 73 Hutterite iPSCs are assigned a pluripotency score and novelty score based on gemone-wide expression. In this first plot all of the samples above the red dashed line (at 20) are considered pluripotent. All samples below the blue dashed line are not pluripotent. All iPSCs have been classified as pluripotent.
-
-```{r fig.width=7, fig.height=6, echo=FALSE}
+pdf("PluritestPlot.pdf")
 par(mar=c(5,4,4,2))
 par(xaxt='n')
 plot(s.new,main="Pluritest",xlab="",ylab="Pluripotency Score",ylim=c(-130,70), cex = .8, pch = 16)
@@ -82,30 +63,23 @@ abline(h=20,lty="dashed",col="red")
 abline(h=-28.92,lty="dashed",col="blue")
 par(xaxt='s')
 axis(1,at=c(1:length(s.new)),labels=names(s.new),las=2, cex.axis = .5)
-```
+dev.off()
 
-Next looking at the novelty score - a score to characterize overall differences in gene expression signatures. We see that all iPSC samples are below the threshold of 1.67 and pass this score threshold.
+pdf("PluritestHeatmap.pdf")
+plot(s.new~novel.new,cex=.8,main="Overview", pch=16, ylab = "Pluripotency Score", xlab = "Novelty")
+abline(v=1.67,col="black")
+abline(h=20,col="black")
+dev.off()
 
-```{r fig.width=7, fig.height=6, echo=FALSE}
+pdf("Novelty.pdf")
 par(mar=c(5,4,4,2))
 par(xaxt='n')
 barplot(novel.new,main = "Novelty Score",names.arg=c(1:length(novel.new)),xlab="",xlim=c(0,length(novel.new)),width=.9,space=(1/9),ylim=c(0,4), ylab="Novelty")
 par(xaxt='s')
 axis(1,at=c(1:nrow(  table.results))-.4,labels=names(s.new),las=2, cex.axis=.5)
 abline(h=1.67,col="black", lty="dashed")
-```
+dev.off()
 
-Lastly looking at both the PluriScore and Novelty you can see that the majority of the 73 iPSCs cluster tightly in the appropriate area. There is one cell line that has an increased novelty score (individual 36), however their PluriScore and Novelty scores are both acceptable.
-
-```{r fig.width=7, fig.height=6, echo=FALSE}
-plot(s.new~novel.new,cex=.8,main="Overview", pch=16, ylab = "Pluripotency Score", xlab = "Novelty")
-abline(v=1.67,col="black")
-abline(h=20,col="black")
-```
-
-
-## Session Information
-
-```{r info}
-sessionInfo()
-```
+# Save CSV FILE for TABLE
+table.results[,5]<-round(RMSE.new,3)
+write.csv(table.results,file="PluritestResults.csv")
