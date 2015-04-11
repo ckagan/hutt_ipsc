@@ -1,5 +1,5 @@
 ---
-title: "Hutterite iPSC Panel QC"
+title: "Hutterite iPSC Panel Pluritest"
 author: "Courtney Kagan"
 ---
 
@@ -7,7 +7,7 @@ Last updated: `r Sys.Date()`
 
 Code version: `r# system("git log -1 --format='%H'", intern = TRUE)`
 
-This is the workflow used for pluritest, QC, and initial expression data analysis on the 73 Hutterite iPSC samples. 
+This is the workflow used for pluritest on the 73 Hutterite iPSC samples and 11 samples with cardiomyocytes treated with doxorubicin. 
 
 ## Pluritest
 Set working directory on spudhead
@@ -72,6 +72,7 @@ table.results[,5]<-round(RMSE.new,3)
 
 ```
 
+#PluriScore
 All samples including 11 samples from a doxorubicin treatment and the 73 Hutterite iPSCs are assigned a pluripotency score and novelty score based on gemone-wide expression. In this first plot all of the samples above the red dashed line (at 20) are considered pluripotent. All samples below the blue dashed line are not pluripotent. All iPSCs have been classified as pluripotent.
 
 ```{r fig.width=7, fig.height=6, echo=FALSE}
@@ -84,6 +85,7 @@ par(xaxt='s')
 axis(1,at=c(1:length(s.new)),labels=names(s.new),las=2, cex.axis = .5)
 ```
 
+#Novelty
 Next looking at the novelty score - a score to characterize overall differences in gene expression signatures. We see that all iPSC samples are below the threshold of 1.67 and pass this score threshold.
 
 ```{r fig.width=7, fig.height=6, echo=FALSE}
@@ -95,6 +97,7 @@ axis(1,at=c(1:nrow(  table.results))-.4,labels=names(s.new),las=2, cex.axis=.5)
 abline(h=1.67,col="black", lty="dashed")
 ```
 
+#Synthesis
 Lastly looking at both the PluriScore and Novelty you can see that the majority of the 73 iPSCs cluster tightly in the appropriate area. There is one cell line that has an increased novelty score (individual 36), however their PluriScore and Novelty scores are both acceptable.
 
 ```{r fig.width=7, fig.height=6, echo=FALSE}
@@ -103,9 +106,5 @@ abline(v=1.67,col="black")
 abline(h=20,col="black")
 ```
 
-
-## Session Information
-
-```{r info}
-sessionInfo()
-```
+#Conclusions
+All samples pass both pluritest for overall pluriscore and novelty. One individual has slighly higher novelty score (36), but it still in the acceptable range. No samples were removed from analysis based on these scores. These scores were also used in follwoing QC.

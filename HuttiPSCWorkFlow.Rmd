@@ -1,86 +1,21 @@
-Hutterite iPSC Panel
-========================================================
+---
+title: "Hutterite iPSC Panel QC"
+author: "Courtney Kagan"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+---
 
-This is the workflow used for QC, pluritest, and initial analysis on the 73 Hutterite iPSC samples and 11 heart samples (dox experiment). 
+Last updated: `r Sys.Date()`
 
-To generate final covariates including Pluri score and novelty we start with running pluritest. 
+Code version: `r# system("git log -1 --format='%H'", intern = TRUE)`
 
-```{r message = FALSE, results='hide'}
-setwd("~/Arrays/Hutt iPSCs")
-load("C:/Users/Courtney/Dropbox/LCL-iPSC/Pluritestsub_REnvironment.unk")
-sample.names = 'Sample_names.txt'
-arraydata = 'YGilad-CK-Mar6-15-ProbeLevelData-NotNormalized-NoBGSubtracted-FinalReport.txt'
-# load packages
-require(lumi)
-require(xtable)
-require(GO.db)
-# set the stage
-samplenames <- readLines(file(sample.names))
-#IMPORT RAW DATA WITH LUMI
-working.lumi<-lumiR(arraydata, convertNuID = FALSE, annotationColumn="PROBE_ID")
-sampleNames(working.lumi) <- samplenames
-#identify probe ID column
-probeind <-match("PROBE_ID", colnames(fData(working.lumi)))
-fData(working.lumi)[,probeind]<-gsub("\"","",fData(working.lumi)[,probeind])
-#RSN NORMALIZATION OF THE DATA
-A <- fData(working.lumi)[,probeind]  #matches on ILMN_Ids for lumi/RSN
-B <- fData(H9targetArray)[,1] #for matches on ILMN_Ids for lumi/RSN
-sel.match <- match(B,A)
-working.lumi <- working.lumi[sel.match[!is.na(sel.match)],] #subsets the exprSet user.lumi down to subsetuser.lumi to match H9 ref array rows
-working.lumi<-lumiN(working.lumi,method="rsn",target=H9targetArray[is.na(sel.match)==FALSE,])
-#RSN NORMALIZATION OF THE DATA CONTINUED
-# assume that illumina Probe Ids are in fData[,1]
-A <- fData(working.lumi)[,probeind]
-sel.match<-match(rownames(W15),A)
-working.lumi.exprs <- working.lumi@assayData$exprs
-rownames(working.lumi.exprs) <- A
-#CALCULATION OF SCORES
-try(
-{
-sel<-match(rownames(W15),A)
-coef<-c(-1.267095e+02  ,4.567437e-03 , 4.377068e-03  ,1.043193e-03)
-working.lumi.int <- working.lumi.exprs[sel[!is.na(sel)],]
-H15.new<-predictH(working.lumi.int, W15[!is.na(sel),])
-H12.new<-predictH(working.lumi.int, W12[!is.na(sel),])
-rss.new<-apply((working.lumi.int - W12[!is.na(sel),]%*%H12.new)^2,2,sum)
-RMSE.new<-sqrt(rss.new/sum(!is.na(sel)))
-novel.new<-apply((working.lumi.int - W12[!is.na(sel),]%*%H12.new)^8,2,sum)
-novel.new<-(novel.new/sum(!is.na(sel)))^(1/8)
-s.new<-drop(coef[1] +coef[2:4]%*%H15.new[c(1,14,13),])
-print(s.new)
-}
-)
-# plot MULTICLASS PLURITEST & overview
-table.results<-matrix(,nrow=ncol(exprs(working.lumi)),ncol=5)
-rownames(table.results)<-colnames(exprs(working.lumi))
-colnames(table.results)<-c("pluri-raw","pluri logit-p","novelty","novelty logit-p","RMSD")
+This is the workflow used for QC and initial expression data analysis on the 73 Hutterite iPSC samples. 
 
-#Populate with data
-table.results[,1]<-round(s.new,3)
-table.results[,2]<-round(exp(s.new)/(1+exp(s.new)),3)
-table.results[,3]<-round(novel.new,3)
-table.results[,5]<-round(RMSE.new,3)
-
-```
-Pluritest figure:
-
-```{r fig.width=7, fig.height=6}
-par(mar=c(5,4,4,2))
-par(xaxt='n')
-plot(s.new,main="Pluritest",xlab="",ylab="Pluripotency Score",ylim=c(-130,70), cex = .6, pch = 20)
-abline(h=25.25,lty="dashed",col="red")
-abline(h=59.95,lty="dashed",col="red")
-abline(h=-28.92,lty="dashed",col="blue")
-abline(h=-130,lty="dashed",col="blue")
-par(xaxt='s')
-axis(1,at=c(1:length(s.new)),labels=names(s.new),las=2, cex.axis = .5)
-
-```
-
-Why is table.results[,2]<-round(exp(s.new)/(1+exp(s.new)),3) the code to get the pluriscore 0/1? How is this being calculated? Is there a true cut-off value?
-
-
-```{r message = FALSE, results='hide'}
+#Hutterite iPSC Expression QC
+47,307 probes on the Illumina Ht12v4 expression array for 73 Hutterite iPSC lines. We remove all probes with a SNP (and additional criteria) and have 22,034 remaing for anlysis. Please see ___ for details on probe exclusion.
+```{r echo=FALSE, include=FALSE}
 library(lumi)
 setwd("~/Arrays/Hutt iPSCs")
 
@@ -115,27 +50,34 @@ sampleNames(data.lumi.clean) = samplenames$Sample
 hearts = c(56:60,67:72)
 data.lumi.clean = data.lumi.clean[,-hearts]
 samplenames = samplenames[-hearts,]
-
+```
+##Normalization
+First we quantile normalize the data using the lumi package in R.
+```{r}
 ###### NORMALIZATION: log2 stabilized and quantile normalization ###################
 data.norm.all <- lumiExpresso(data.lumi.clean, bg.correct=TRUE, bgcorrect.param=list(method='forcePositive'), variance.stabilize=TRUE, varianceStabilize.param = list(method="log2"), normalize=TRUE, normalize.param=list(method="quantile"), QC.evaluation=TRUE, QC.param=list(), verbose=TRUE)
 
-show(data.norm.all)
-
+```
+##QC
+Start with looking at things Pre- and Post-Normalization.
+```{r echo=FALSE, fig.width=7, fig.height=6}
 ############# QC #####################
-summary(data.norm.all, 'QC')
 
 ##Look at plots of array data (boxplot, density, etc) :
-pdf(file = "QC_Normalization.pdf")
 boxplot(data.lumi.clean, main= "Pre-normalization")
 boxplot(data.norm.all, main = "Post-Normalization")
-dev.off()
 
-plot(data.lumi.clean, what='density', main= "Density plot of intensity")
-plot(data.norm.all, what='density', main = "Density plot of intensity - Normalized ")
+plot(data.lumi.clean, what='density', main= "Density plot of intensity Pre-normalization")
+plot(data.norm.all, what='density', main = "Density plot of intensity Post-Normalization")
 
 ##Check that replicates are most related
-plot(data.norm.all, what='sampleRelation')
+plot(data.norm.all, what='sampleRelation', main = "Post-Normalization")
+```
+We see that the normalized data looks as expected.
 
+##Probe Detection
+Next we filter out probes based on detection. We count the number of times a probe has a detection p-value <.05 in all 73 indivduals to see if we should include it.
+```{r include=FALSE}
 ######### Probe Detection #############
 #Look for detection
 detection = data.norm.all@assayData$detection
@@ -143,8 +85,13 @@ detection = data.norm.all@assayData$detection
 colnames(detection) = samplenames$Sample
 #Count the number of probes that have a detection p-value<.05
 detected = rowSums(detection <0.05)
+```
 
+```{r echo=FALSE, fig.width=7, fig.height=6}
+hist(detected, breaks = 60, main="Histogram of Detected Probes by Individual", xlab = "Number of Individuals", ylab = "Frequency of Detected Probes")
+```
 
+```{r include=FALSE}
 #Here is where I select the number of indiv that need to have the probe expressed
 detect.gene<- which(detected > 7)
 
@@ -154,11 +101,13 @@ head(data.norm.all@featureData[[5]])
 ##[1] "ILMN_1343291" "ILMN_1343295" "ILMN_1651199" "ILMN_1651209" "ILMN_1651210" "ILMN_1651221"
 ###Convert expr_quant rownames to
 rownames(norm_quant.all)=data.norm.all@featureData[[5]]
-#With this threshold 15,293 probes out of 47,315 are expressed
+#With this threshold 14,306 probes out of 47,307 are expressed
 expr_quant.all <- norm_quant.all[detect.gene,]
-#14,306 genes
+```
 
+At 7 individuals there is an inflection point (also around 10% of the samples) and for that reason I chose to exclude probes that had a detection p-value <.05 in 7 inviduals or less. This leaves us with 14,306 probes.
 
+```{r echo=FALSE, include=FALSE}
 ###### Load in Covariates ###############
 #Converted some factors so they are categorical 
 colnames(expr_quant.all) = samplenames$Sample
@@ -182,18 +131,20 @@ sex.f = as.factor(sex)
 pluri.num =as.numeric(pluri)
 novel.num = as.numeric(novel)
 age.num = as.numeric(age)
-
-
+```
+##Conversion to Gene
+Next we converted the probes to genes. And found that we have 10,950 unique genes represented.
+```{r}
 ######## Converting probes to gene #################
 ## Finding the unique gene names matching probes to gene names using the good probe list
 gene_names=c()
 for(i in 1:dim(expr_quant.all)[1]){
-  gene_names=c(gene_names,as.vector(goodprobes[as.vector(goodprobes$probeID)==row.names(expr_quant.all)[i],8]))
+  gene_names=c(gene_names,as.vector(goodprobes[as.vector(goodprobes$probeID)==row.names(expr_quant.all)[i],7]))
 }
 
 symbolsUniq = unique(gene_names)
 length(symbolsUniq)
-# 10,950 have gene names
+# 11,237 have gene names
 
 
 ## This loop will give the most 3' value for multiple probes within the same gene. In the end you get a simple file with all genes that are expressed with the corresponding mean intensity expression levels across its different probes.
@@ -218,36 +169,41 @@ for(gene in unique(gene_names)){
   
 } 
 dim(expr_gene)
-#11492 84
+#11237 73
 rownames(expr_gene) = unique(gene_names)
 colnames(expr_gene) = colnames(expr_quant.all)
+```
+```{r include=FALSE}
 #colnames(expr_gene) =samplenames$Name
 ##One gene is labeled "NA" and therefore also has no data attached
-which(is.na(row.names(expr_gene)))
+#which(is.na(row.names(expr_gene)))
 #Row 4110 is NA
-expr_gene_new = na.omit(expr_gene)
-dim(expr_gene_new)
+#expr_gene_new = na.omit(expr_gene)
+#dim(expr_gene_new)
 # 10949    73
-expr_gene = expr_gene_new
+#expr_gene = expr_gene_new
 
-write.table(expr_gene, 'OriginGeneExpression_Normalized.txt', sep='\t', row.names=T, quote=F)
+#write.table(expr_gene, 'OriginGeneExpression_Normalized.txt', sep='\t', row.names=T, quote=F)
+```
 
+```{r include=FALSE}
 ######### Start from Data ###########
 
-expr_gene = read.table('OriginGeneExpression_Normalized.txt', header=T, as.is=T, sep='\t', row.names=1)
-samplenames = read.table('Covars.txt', header=T, sep ='\t')
+#expr_gene = read.table('OriginGeneExpression_Normalized.txt', header=T, as.is=T, sep='\t', row.names=1)
+#samplenames = read.table('Covars.txt', header=T, sep ='\t')
 #Re-order samplenames based on array location
-samplenames = samplenames[order(samplenames$Order),]
+#samplenames = samplenames[order(samplenames$Order),]
 
-hearts = c(56:60,67:72)
-samplenames = samplenames[-hearts,]
-colnames(expr_gene) = samplenames$Sample
-goodprobes= read.table('ht12_probes_snps_ceu_hg19_af_0.05_map_37.txt', header=T, sep='\t')
+#hearts = c(56:60,67:72)
+#samplenames = samplenames[-hearts,]
+#colnames(expr_gene) = samplenames$Sample
+#goodprobes= read.table('ht12_probes_snps_ceu_hg19_af_0.05_map_37.txt', header=T, sep='\t')
 
 ## Create expression table for GEMMA ####
-expr_gene_new = t(expr_gene)
+#expr_gene_new = t(expr_gene)
 ## Re-order by individual in excel
-write.table(expr_gene_new, 'OriginGeneExpression_Normalized_GEMMA.txt', sep='\t', row.names=T, quote=F)
+#write.table(expr_gene_new, 'OriginGeneExpression_Normalized_GEMMA.txt', sep='\t', row.names=T, quote=F)
+```
 
 ############## Data Analysis ####################
 
@@ -421,230 +377,6 @@ pcaresults.ipsc = lmPCA(ipsc.pca,covars.ipsc,4)
 rownames(pcaresults.ipsc) = c("mef","batch","sex","indiv","pluri","novel","der")
 colnames(pcaresults.ipsc) = c("PC1 pval", "PC1 adj R sqs","PC2 pval", "PC2 adj R sqs","PC3 pval", "PC3 adj R sqs","PC4 pval", "PC4 adj R sqs")
 
-###########DE Analysis Code###############
-library(limma)
-
-#meth.final = expr_quant.all
-meth.final = expr_gene
-
-labs = c("OF", "OL", "OL", "LCL", "OL", "OL", "OL", "Fib", "OL", "Fib", 
-  "LCL", "OF", "Fib", "LCL", "OL", "LCL", "Fib", "OL", "OF", "OL", 
-  "OL", "OL", "OL", "OF")
-
-design <-(model.matrix(~0+labs))
-
-colnames(design) <- c("Fib", "LCL", "OF", "OL")
-
-fit  <- lmFit(meth.final, design)
-fit <- eBayes(fit)
-
-cm <- makeContrasts(
-  OLvsOF = OL-OF,
-  OLvsLCL = OL-LCL,
-  OFvsFib = OF-Fib,
-  LCLvsFib = LCL-Fib,
-  levels=design)
-
-fit2 <- contrasts.fit(fit, cm)
-fit2 <-eBayes(fit2)
-
-iPSC_DMR <- topTable(fit2, coef=1, adjust="BH", number=Inf, sort.by="p")
-LCLs_vs_iPSC.L <- topTable(fit2, coef=2, adjust="BH", number=Inf, sort.by="p")
-Fibs_vs_iPSC.F <- topTable(fit2, coef=3, adjust="BH", number=Inf, sort.by="p")
-LCL_vs_Fibs <- topTable(fit2, coef=4, adjust="BH", number=Inf, sort.by="p")
-
-overlap_iPSC_DMR_Origin_DMRs = iPSC_DMR[iPSC_DMR$adj.P.Val < 0.05 , ][rownames(iPSC_DMR[iPSC_DMR$adj.P.Val < 0.05 ,]) %in% rownames(LCL_vs_Fibs[LCL_vs_Fibs$adj.P.Val < 0.05 ,]) , ]
-
-dist_of_Ps = iPSC_DMR[rownames(iPSC_DMR) %in% rownames(LCL_vs_Fibs[LCL_vs_Fibs$adj.P.Val < 0.05 , ]) , ]
-
-head(iPSC_DMR[iPSC_DMR$adj.P.Val < 0.05 , ])
-dim(LCL_vs_Fibs[LCL_vs_Fibs$adj.P.Val < 0.05 , ])
-dim(iPSC_DMR[iPSC_DMR$adj.P.Val < 0.05 , ])
-dim(LCLs_vs_iPSC.L[LCLs_vs_iPSC.L$adj.P.Val < 0.05 , ])
-dim(Fibs_vs_iPSC.F[Fibs_vs_iPSC.F$adj.P.Val < 0.05 , ])
-
-write.table(LCL_vs_Fibs,'DE_LCLvFib_FDR5.txt', quote=F, sep = '\t')
-write.table(LCLs_vs_iPSC.L,'DE_LCLviPSC_FDR5.txt', quote=F, sep = '\t')
-write.table(Fibs_vs_iPSC.F,'DE_FibviPSC_FDR5.txt', quote=F, sep = '\t')
-write.table(iPSC_DMR, 'DE_F.iPSCvL.iPSC_FDR5.txt', quote=F, sep = "\t")
-
-pdf(file='Histograms.pdf')
-hist(iPSC_DMR$P.Value, main = "Distribution of L-iPSC vs F-iPSC DE P-values", xlab= "P-value")
-hist(LCL_vs_Fibs$P.Value, main = "Distribution of LCL vs Fibroblast DE P-values", xlab= "P-value")
-hist(LCLs_vs_iPSC.L$P.Value, main = "Distribution of L-iPSCs vs LCLs DE P-values", xlab= "P-value")
-hist(Fibs_vs_iPSC.F$P.Value, main = "Distribution of F-iPSC vs Fibroblasts DE P-values", xlab= "P-value")
-dev.off()
-
-###### Do DE with subsets of genes (DE genes between primary tissues) #####
-LvF = LCL_vs_Fibs[LCL_vs_Fibs$adj.P.Val < 0.05 , 1:2]
-LvI = LCLs_vs_iPSC.L[LCLs_vs_iPSC.L$adj.P.Val < 0.05 , 1:2]
-FvI = Fibs_vs_iPSC.F[Fibs_vs_iPSC.F$adj.P.Val < 0.05 , 1:2]
-LvF_genes = meth.final[ rownames(meth.final) %in% LvF$ID,]
-LvI_genes = meth.final[ rownames(meth.final) %in% LvI$ID,]
-FvI_genes = meth.final[ rownames(meth.final) %in% FvI$ID,]
-
-#Using only LvF genes
-cm3 <- makeContrasts(
-  OLvsOF = OL-OF,
-  levels=design)
-fit  <- lmFit(LvF_genes, design)
-fit <- eBayes(fit)
-fit2 <- contrasts.fit(fit, cm3)
-fit2 <-eBayes(fit2)
-
-iPSC_DMR_LvFgenes <- topTable(fit2, coef=1, adjust="BH", number=Inf, sort.by="p")
-
-#Using only LvI genes
-fit  <- lmFit(LvI_genes, design)
-fit <- eBayes(fit)
-fit2 <- contrasts.fit(fit, cm3)
-fit2 <-eBayes(fit2)
-iPSC_DMR_LvIgenes <- topTable(fit2, coef=1, adjust="BH", number=Inf, sort.by="p")
-
-#Using only FvI genes
-fit  <- lmFit(FvI_genes, design)
-fit <- eBayes(fit)
-fit2 <- contrasts.fit(fit, cm3)
-fit2 <-eBayes(fit2)
-iPSC_DMR_FvIgenes <- topTable(fit2, coef=1, adjust="BH", number=Inf, sort.by="p")
-
-#### QQ Plot#####
-pvals = iPSC_DMR$P.Value
-observed <- sort(pvals)
-lobs <- -(log10(observed))
-
-expected <- c(1:length(observed)) 
-lexp <- -(log10(expected / (length(expected)+1)))
-
-pdf("QQplot_FDRLine_FDR5DE.pdf", width=6, height=6)
-plot(c(0,7), c(0,7), col="red", lwd=1, type="l", main = "QQ Plot by DE Gene Subsets",xlab="Expected (-logP)", ylab="Observed (-logP)", xlim=c(0,7), ylim=c(0,7), las=1, xaxs="i", yaxs="i", bty="l")
-points(lexp, lobs, pch=19, cex=.6, col="black") 
-
-pvalsLvF = iPSC_DMR_LvFgenes$P.Value
-observedLvF <- sort(pvalsLvF)
-lobsLvF <- -(log10(observedLvF))
-expectedLvF <- c(1:length(observedLvF)) 
-lexpLvF <- -(log10(expectedLvF / (length(expectedLvF)+1)))
-points(lexpLvF, lobsLvF, pch=19, cex=.6, col="green") 
-
-pvalsLvI = iPSC_DMR_LvIgenes$P.Value
-observedLvI <- sort(pvalsLvI)
-lobsLvI <- -(log10(observedLvI))
-expectedLvI <- c(1:length(observedLvI)) 
-lexpLvI <- -(log10(expectedLvI / (length(expectedLvI)+1)))
-points(lexpLvI, lobsLvI, pch=19, cex=.6, col="cyan3") 
-
-pvalsFvI = iPSC_DMR_FvIgenes$P.Value
-observedFvI <- sort(pvalsFvI)
-lobsFvI <- -(log10(observedFvI))
-expectedFvI <- c(1:length(observedFvI)) 
-lexpFvI <- -(log10(expectedFvI / (length(expectedFvI)+1)))
-points(lexpFvI, lobsFvI, pch=19, cex=.6, col="darkorange") 
-
-legend(x = "topleft", pch = 19, col = c("black", "green", "cyan3", "darkorange"), c("All Genes", "Genes DE LCL v Fib", "Genes DE LCL v L-iPSC", "Genes DE Fib v F-iPSC"))
-lines(c(0,7), c(log10(.95/.05),(log10(.95/.05)+7)))
-dev.off()
-
-#To get the correlation between indiv vs non-indiv
-library(gplots)
-cormatrix <- cor(expr_gene)
-varmatrix = var(expr_gene)
-names = c("S0961", "S1194", "S8126", "S4280", "S1194", 
-          "S4280", "S0961", "S8126", "S1194", "S0961", 
-          "S1194", "S8126", "S0961", "S4280", "S8126", 
-          "S4280")
-colnames(cormatrix) = names
-rownames(cormatrix) = names
-
-colnames(varmatrix) = names
-rownames(varmatrix) = names
-
-replicates=c()
-non.replicates=c()
-
-for(i in 1:15){
-  for(j in (i+1):16){
-    if(names[i]==names[j]){
-      replicates=c(replicates,cormatrix[i,j])
-    }
-    else{
-      non.replicates=c(non.replicates,cormatrix[i,j])
-    }
-  }
-}
-boxplot2(replicates,non.replicates, main = "Correlation of Samples", ylab = "Correlation", xlab = "Replicates vs Non-Replicates")
-
-varmatrix = var(expr_gene.i)
-var.m = varmatrix[,1]
-
-boxplot2(var.m~names, main = "Variance of Individuals", ylab = "Variance", xlab = "Individuals")
-
-varmatrix = var(pluri.residual.int)
-var.m = varmatrix[,1]
-
-col.box = c("red", "blue", "blue", 
-            "blue", "blue", "blue", "blue", "red", 
-            "blue", "blue", "red", "blue", "blue", 
-            "blue", "blue", "red")
-varorder = c("S0961", "S1194", "S8126", "S4280", 
-               "S1194", "S4280", "S0961", "S8126", "S1194", "S0961", "S1194", 
-               "S8126", "S0961", "S4280", "S8126", "S4280")
-boxplot2(var.m~varorder, main = "Variance of individuals after regressing Pluri score", ylab = "Variance", xlab = "Individuals")
-beeswarm(var.m~varorder,add=T, col=col.box, vertical=T,pch=20)
-
-###### Venn diagram code ###########
-#Created by Irene Gallego Romero
-library(VennDiagram)
-
-### Make Venn of DE genes at 5% #######
-probes <- data.frame(rownames(iPSC_DMR))
-names(probes) <- "probes"
-
-make.venn.quad <- function(geneset1, geneset2, geneset3, geneset4, geneset1.label, geneset2.label, geneset3.label, geneset4.label, univ){
-  univ$g1 <- univ$probes %in% geneset1
-  univ$g2 <- univ$probes %in% geneset2
-  univ$g3 <- univ$probes %in% geneset3 
-  univ$g4 <- univ$probes %in% geneset4 
-  #pdf(file=paste(prefix, ".pdf", sep=""), width=7, height=7)
-  venn.placeholder <- draw.quad.venn(length(geneset1),length(geneset2), length(geneset3), length(geneset4), dim(univ[univ$g1 == T & univ$g2 == T , ])[1], dim(univ[univ$g1 == T & univ$g3 == T , ])[1], dim(univ[univ$g1 == T & univ$g4 == T , ])[1], dim(univ[univ$g2 == T & univ$g3 == T , ])[1], dim(univ[univ$g2 == T & univ$g4 == T , ])[1], dim(univ[univ$g3 == T & univ$g4 == T , ])[1], dim(univ[univ$g1 == T & univ$g2 == T & univ$g3 == T , ])[1], dim(univ[univ$g1 == T & univ$g2 == T & univ$g4 == T , ])[1], dim(univ[univ$g1 == T & univ$g3 == T & univ$g4 == T , ])[1], dim(univ[univ$g2 == T & univ$g3 == T & univ$g4 == T , ])[1],  dim(univ[univ$g1 == T & univ$g2 == T & univ$g3 == T & univ$g4 == T , ])[1], c(geneset1.label, geneset2.label, geneset3.label, geneset4.label), fill=c("goldenrod", "plum4", "steelblue3", "darkolivegreen3"), alpha=c(0.5, 0.5, 0.5, 0.5),col=NA, euler.d=T)
-  complement.size <- dim(univ[univ$g1 == F & univ$g2 == F & univ$g3 == F & univ$g4 == F , ])[1]
-  grid.text(paste(complement.size, " not DE in any", sep=""), x=0.2, y=0.08)
-  #dev.off()
-}
-
-dev.off()
-# Make venn of full
-pdf(file = "VennDiagram_DE_FDR5.pdf")
-make.venn.quad(rownames(iPSC_DMR[iPSC_DMR$adj.P.Val < 0.05 , ]), rownames(LCL_vs_Fibs[LCL_vs_Fibs$adj.P.Val < 0.05 , ]), rownames(LCLs_vs_iPSC.L[LCLs_vs_iPSC.L$adj.P.Val < 0.05 , ]), rownames(Fibs_vs_iPSC.F[Fibs_vs_iPSC.F$adj.P.Val < 0.05 , ]), paste("DEs iPSC", dim(iPSC_DMR[iPSC_DMR$adj.P.Val < 0.05 , ])[1]), paste("DEs Origins", dim(LCL_vs_Fibs[LCL_vs_Fibs$adj.P.Val < 0.05 , ])[1]), paste("DEs LCLs", dim(LCLs_vs_iPSC.L[LCLs_vs_iPSC.L$adj.P.Val < 0.05 , ])[1]), paste("DEs Fibs", dim(Fibs_vs_iPSC.F[Fibs_vs_iPSC.F$adj.P.Val < 0.05 , ])[1]), probes)
-dev.off()
-
-####### Make Venn of probe inclusion scheme #######
-probes <- data.frame(rownames(norm_quant.all))
-names(probes) <- "probes"
-make.venn.quad <- function(geneset1, geneset2, geneset3, geneset4, geneset1.label, geneset2.label, geneset3.label, geneset4.label, univ){
-  univ$g1 <- univ$probes %in% geneset1
-  univ$g2 <- univ$probes %in% geneset2
-  univ$g3 <- univ$probes %in% geneset3 
-  univ$g4 <- univ$probes %in% geneset4 
-  venn.placeholder <- draw.quad.venn(cex = rep(2),cat.cex =rep(1),length(geneset1),length(geneset2), length(geneset3), length(geneset4), dim(univ[univ$g1 == T & univ$g2 == T , ])[1], dim(univ[univ$g1 == T & univ$g3 == T , ])[1], dim(univ[univ$g1 == T & univ$g4 == T , ])[1], dim(univ[univ$g2 == T & univ$g3 == T , ])[1], dim(univ[univ$g2 == T & univ$g4 == T , ])[1], dim(univ[univ$g3 == T & univ$g4 == T , ])[1], dim(univ[univ$g1 == T & univ$g2 == T & univ$g3 == T , ])[1], dim(univ[univ$g1 == T & univ$g2 == T & univ$g4 == T , ])[1], dim(univ[univ$g1 == T & univ$g3 == T & univ$g4 == T , ])[1], dim(univ[univ$g2 == T & univ$g3 == T & univ$g4 == T , ])[1],  dim(univ[univ$g1 == T & univ$g2 == T & univ$g3 == T & univ$g4 == T , ])[1], c(geneset1.label, geneset2.label, geneset3.label, geneset4.label), fill=c("goldenrod", "plum4", "steelblue3", "darkolivegreen3"), alpha=c(0.5, 0.5, 0.5, 0.5),col=NA, euler.d=T)
-  complement.size <- dim(univ[univ$g1 == F & univ$g2 == F & univ$g3 == F & univ$g4 == F , ])[1]
-  grid.text(paste(complement.size, " not detected in any", sep=""), x=0.2, y=0.08)
-  }
-
-dev.off()
-# Make venn of full
-pdf(file = "VennDiagram_ProbeDetection.pdf", width=12.5, height=12)
-make.venn.quad(probes[detect.Fib,], probes[detect.LCL,], probes[detect.FiPSC,], probes[detect.LiPSC,], paste("Detected in Fibroblasts", length(detect.Fib)), paste("Detected in LCLs", length(detect.LCL)), paste("Detected in F-iPSCs", length(detect.FiPSC)), paste("Detected in L-iPSCs", length(detect.LiPSC)), probes)
-dev.off()
-
-####### Boxplot of DMPs between L-iPSCs and F-iPSCs ordered by genomic location #################
-library(beeswarm)
-pdf(file = "iPSC_DE.pdf")
-iPSC_DMR_loc = expr_gene[which(rownames(expr_gene) == "ENSG00000215845"),]
-boxplot(iPSC_DMR_loc~samplenames$Type, main = "Expression of TSTD1")
-beeswarm(iPSC_DMR_loc~samplenames$Type, add=T, col=2, pwcol = samplenames$Deriv, vertical=T,pch=20)
-legend(x = "topright", pch = 20, col = c(1:4), c("LCL origin", "Fib origin", "LCL", "Fib"))
-dev.off()
 
 ################## Varience explained ############
 samplenames = read.table('covar.txt', header=T, sep ='\t')
@@ -757,83 +489,3 @@ colnames(gene_map) = colnames(goodprobes)
 chr.gene = gene_map[,c(8,1)]
 
 write.table(gene_map, 'OriginGeneCoords.txt', quote=F, sep ='\t', row.names=F)
-
-###### Subset randomly down to three individuals ##########
-#### Re-do DE with subset #######
-ipsc_expr = expr_gene[,grep ("LCL|Fib" , colnames(expr_gene), invert = T)]
-Ind1 = ipsc_expr[,grep ("Ind1 L-iPSC" , colnames(ipsc_expr))]
-Ind2 = ipsc_expr[,grep ("Ind2 L-iPSC" , colnames(ipsc_expr))]
-Ind3 = ipsc_expr[,grep ("Ind3 L-iPSC" , colnames(ipsc_expr))]
-Ind4 = ipsc_expr[,grep ("Ind4 L-iPSC" , colnames(ipsc_expr))]
-LCL_expr = expr_gene[,grep ("LCL" , colnames(expr_gene))]
-Fib_expr = expr_gene[,grep ("Fib" , colnames(expr_gene))]
-Fsubset_expr_ipsc = ipsc_expr[,grep ("F-iPSC" , colnames(ipsc_expr))]
-library(limma)
-labs = c("Fib", "Fib", "Fib", "Fib","LCL", "LCL", "LCL", "LCL", "OF", "OF", 
-         "OF", "OF", "OL","OL", "OL", "OL")
-design <-(model.matrix(~0+labs))
-colnames(design) <- c("LCL","Fib", "OF", "OL")
-sig_iPSCDMR = matrix(data = NA, nrow = 2500, ncol = 7)
-
-for(i in 1:500){
-  rand_1 = as.matrix(Ind1[,sample(1:3, 1,replace=FALSE)])
-  rand_2 = as.matrix(Ind2[,sample(1:3, 1,replace=FALSE)])
-  rand_3 = as.matrix(Ind3[,sample(1:3, 1,replace=FALSE)])
-  rand_4 = as.matrix(Ind4[,sample(1:3, 1,replace=FALSE)])
-  subset_expr_ipsc = cbind(rand_1, rand_2, rand_3,rand_4)
-  rownames(subset_expr_ipsc) = rownames(Ind1)
-  rm(new_DE)
-  new_DE = cbind(LCL_expr, Fib_expr, Fsubset_expr_ipsc, subset_expr_ipsc)
-  
-  fit  <- lmFit(new_DE, design)
-  fit <- eBayes(fit)
-  
-  cm <- makeContrasts(
-    OLvsOF = OL-OF,
-    OLvsLCL = OL-LCL,
-    OFvsFib = OF-Fib,
-    LCLvsFib = LCL-Fib,
-    levels=design)
-  
-  fit2 <- contrasts.fit(fit, cm)
-  fit2 <-eBayes(fit2)
-  
-  iPSC_DMR <- topTable(fit2, coef=1, adjust="BH", number=Inf, sort.by="p")
-  row.num = i + (i-1)
-  sig_iPSCDMR[row.num,2:7] = as.matrix(rbind(iPSC_DMR[1,]))
-  sig_iPSCDMR[row.num,1] = as.character(row.names(iPSC_DMR[1,]))
-  sig_iPSCDMR[(row.num+1),2:7] = as.matrix(rbind(iPSC_DMR[2,]))
-  sig_iPSCDMR[row.num+1,1] = as.character(row.names(iPSC_DMR[2,]))
-  rm(fit, cm, fit2, iPSC_DMR, row.num)
-}
-unique.sig.iPSCs <- unique(sig_iPSCDMR[as.numeric(sig_iPSCDMR[,6]) < .05 , ])
-dim(unique.sig.iPSCs)
-table.unqiue.sig.iPSCs <- table(unique.sig.iPSCs)
-write.table(sig_iPSCDMR, 'Permuted_DE.txt', sep='\t', quote=F)
-
-###### Venn diagram code ###########
-#Created by Irene Gallego Romero
-library(VennDiagram)
-
-### Make Venn of DE genes at 5% with 16 indiv #######
-probes <- data.frame(rownames(iPSC_DMR))
-names(probes) <- "probes"
-
-make.venn.quad <- function(geneset1, geneset2, geneset3, geneset4, geneset1.label, geneset2.label, geneset3.label, geneset4.label, univ){
-  univ$g1 <- univ$probes %in% geneset1
-  univ$g2 <- univ$probes %in% geneset2
-  univ$g3 <- univ$probes %in% geneset3 
-  univ$g4 <- univ$probes %in% geneset4 
-  #pdf(file=paste(prefix, ".pdf", sep=""), width=7, height=7)
-  venn.placeholder <- draw.quad.venn(length(geneset1),length(geneset2), length(geneset3), length(geneset4), dim(univ[univ$g1 == T & univ$g2 == T , ])[1], dim(univ[univ$g1 == T & univ$g3 == T , ])[1], dim(univ[univ$g1 == T & univ$g4 == T , ])[1], dim(univ[univ$g2 == T & univ$g3 == T , ])[1], dim(univ[univ$g2 == T & univ$g4 == T , ])[1], dim(univ[univ$g3 == T & univ$g4 == T , ])[1], dim(univ[univ$g1 == T & univ$g2 == T & univ$g3 == T , ])[1], dim(univ[univ$g1 == T & univ$g2 == T & univ$g4 == T , ])[1], dim(univ[univ$g1 == T & univ$g3 == T & univ$g4 == T , ])[1], dim(univ[univ$g2 == T & univ$g3 == T & univ$g4 == T , ])[1],  dim(univ[univ$g1 == T & univ$g2 == T & univ$g3 == T & univ$g4 == T , ])[1], c(geneset1.label, geneset2.label, geneset3.label, geneset4.label), fill=c("goldenrod", "plum4", "steelblue3", "darkolivegreen3"), alpha=c(0.5, 0.5, 0.5, 0.5),col=NA, euler.d=T)
-  complement.size <- dim(univ[univ$g1 == F & univ$g2 == F & univ$g3 == F & univ$g4 == F , ])[1]
-  grid.text(paste(complement.size, " not DE in any", sep=""), x=0.2, y=0.08)
-  #dev.off()
-}
-
-dev.off()
-# Make venn of full
-pdf(file = "VennDiagram_DE_FDR5_16indv.pdf")
-make.venn.quad(rownames(iPSC_DMR[iPSC_DMR$adj.P.Val < 0.05 , ]), rownames(LCL_vs_Fibs[LCL_vs_Fibs$adj.P.Val < 0.05 , ]), rownames(LCLs_vs_iPSC.L[LCLs_vs_iPSC.L$adj.P.Val < 0.05 , ]), rownames(Fibs_vs_iPSC.F[Fibs_vs_iPSC.F$adj.P.Val < 0.05 , ]), paste("DEs iPSC", dim(iPSC_DMR[iPSC_DMR$adj.P.Val < 0.05 , ])[1]), paste("DEs Origins", dim(LCL_vs_Fibs[LCL_vs_Fibs$adj.P.Val < 0.05 , ])[1]), paste("DEs LCLs", dim(LCLs_vs_iPSC.L[LCLs_vs_iPSC.L$adj.P.Val < 0.05 , ])[1]), paste("DEs Fibs", dim(Fibs_vs_iPSC.F[Fibs_vs_iPSC.F$adj.P.Val < 0.05 , ])[1]), probes)
-dev.off()
-
