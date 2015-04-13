@@ -17,7 +17,7 @@ This is the workflow used for QC and initial expression data analysis on the 73 
 47,307 probes on the Illumina Ht12v4 expression array for 73 Hutterite iPSC lines. We remove all probes with a SNP (and additional criteria) and have 22,034 remaing for anlysis. Please see ___ for details on probe exclusion.
 ```{r echo=FALSE, include=FALSE}
 library(lumi)
-setwd("~/Arrays/Hutt iPSCs")
+setwd("C:/Users/Courtney/Dropbox/LCL-iPSC/GEMMA eQTLs/Hutt iPSCs")
 
 ##Create object with name of data file:
 data = c('YGilad-CK-Mar6-15-ProbeLevelData-NotNormalized-NoBGSubtracted-FinalReport.txt')
@@ -173,7 +173,9 @@ dim(expr_gene)
 rownames(expr_gene) = unique(gene_names)
 colnames(expr_gene) = colnames(expr_quant.all)
 ```
+
 ```{r include=FALSE}
+##If gene names are not Ensembl then you will need to remove NAs###
 #colnames(expr_gene) =samplenames$Name
 ##One gene is labeled "NA" and therefore also has no data attached
 #which(is.na(row.names(expr_gene)))
@@ -182,7 +184,6 @@ colnames(expr_gene) = colnames(expr_quant.all)
 #dim(expr_gene_new)
 # 10949    73
 #expr_gene = expr_gene_new
-
 #write.table(expr_gene, 'OriginGeneExpression_Normalized.txt', sep='\t', row.names=T, quote=F)
 ```
 
@@ -315,7 +316,9 @@ dev.off()
 x.pca = prcomp(na.omit(t(expr_gene)), center = T,scale=T)
 x.pca.sum = summary(x.pca)
 pdf(file = "PCA.pdf")
-plot(x.pca$x[,1], x.pca$x[,2], xlab = paste('PC1 (',x.pca.sum$importance[2,1], ')', sep = ''),ylab = paste('PC2 (',x.pca.sum$importance[2,2], ')', sep = ''), main = "PC1/2 all data", pch = 20, col = samplenames$Batch)
+plot(x.pca$x[,1], x.pca$x[,2], xlab = paste('PC1 (',x.pca.sum$importance[2,1], ')', sep = ''),ylab = paste('PC2 (',
+
+], ')', sep = ''), main = "PC1/2 all data", pch = 20, col = samplenames$Batch)
 text(x.pca$x[,1], x.pca$x[,2], samplenames$Batch)
 plot(x.pca$x[,1], x.pca$x[,3], xlab = paste('PC1 (',x.pca.sum$importance[2,1], ')', sep = ''),ylab = paste('PC3 (',x.pca.sum$importance[2,3], ')', sep = ''), main = "PC1/3 all data", col =samplenames$Batch, pch = 20)
 plot(x.pca$x[,1], x.pca$x[,4], xlab = paste('PC1 (',x.pca.sum$importance[2,1], ')', sep = ''),ylab = paste('PC4 (',x.pca.sum$importance[2,4], ')', sep = ''), main = "PC1/4 all data", col ="black", pch = 20)
