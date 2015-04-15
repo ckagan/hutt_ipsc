@@ -27,6 +27,7 @@ CAGE.bed.DConly = CAGE.bed[-nas,]
 which(is.na(CAGE.bed.DConly[,7]))
 write.table(CAGE.bed.DConly, 'Hutt.CAGE.Overlap.txt', sep='\t', quote=F,row.names=F)
 
+setwd("C:/Users/Courtney/Dropbox/LCL-iPSC/GEMMA eQTLs/Hutt iPSCs")
 ##To directly filter mastercolum file
 ENSG.ordered = as.matrix(CAGE.bed$GeneID)
 mastercol= read.table('hutt.imputed.1Mb.mastercols.txt', header=F, sep='\t')
@@ -45,7 +46,8 @@ exprs.o = expr_gene[matcherind,]
 exprs.o.t = t(exprs.o)
 
 ## Create PCA file based on re-ordered expression with only Darren's expressed genes
-htpca = prcomp(exprs.o,scale.=TRUE)
+exprs = read.table("Expr.DConly.Ordered.txt",header=F,sep="\t")
+htpca = prcomp(exprs,scale.=TRUE)
 xhtpca = htpca$x
 write.table(xhtpca,"hutt.DConly.Ordered.pcs.txt",col.names=F,row.names=F,quote=F,sep="\t")
 
@@ -55,7 +57,6 @@ idcoefs.o = idcoefs[matcherind,matcherind]
 write.table(ordered.ENSG,"ENSGList.DConly.Ordered.txt",row.names=F,col.names=F,quote=F,sep="\t")
 write.table(exprs.o.t,"Expr.DConly.Ordered.txt",row.names=T,col.names=F,quote=F,sep="\t")
 ##In excel sort by indiv and remove row names(individuals)
-
 x.pca.sum = summary(htpca)
 x.pca.sum$importance[2,1]
 htpca.unsc = prcomp(exprs.o,scale.=F)
