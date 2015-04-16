@@ -85,9 +85,49 @@ write.table(ordermat,"addSNP.1415.ordered.txt",row.name=F,col.names=F,quote=F)
 # }
 
 
+##Pulling out overlapping findivs
+ck = read.table("hutt.imputed.73subset.fam")[,2]
+dc = read.table("hutt.imputed.500ht.fam")[,2]
+overlap = match(ck,dc)
+sum(is.na(overlap))
+#18 individual not in Darren's study
+fillers = sample(1:431, 18)
+##Generated until no overlap was left
+match(overlap,fillers)
+ck.only = na.omit(overlap)
+ck_fillers = append(ck.only,fillers)
+newck = sort(ck_fillers, decreasing=FALSE)
+dc.fam = read.table("hutt.imputed.500ht.fam")
+new.ck.fam = dc.fam[newck,]
+write.table(new.ck.fam, 'hutt.imputed.newck.fam',row.name=F,col.names=F,quote=F)
 
+orderlist = new.ck.fam$V2
+rawmat = read.table("addSNP1415.coef.3671",header=T)
+ordermat = matrix(NA,length(orderlist),length(orderlist))
+for (i in 1:length(orderlist)) {
+  for (j in 1:length(orderlist)) {
+    row_index = rawmat[, 1] == orderlist[i] & rawmat[, 2] == orderlist[j] |
+      rawmat[, 2] == orderlist[i] & rawmat[, 1] == orderlist[j]
+    stopifnot(sum(row_index) == 1)
+    ordermat[i, j] = rawmat[row_index, 3]
+    ordermat[j, i] = rawmat[row_index, 3]  
+  }
+}
+write.table(ordermat,"addSNP.1415.newck.ordered.txt",row.name=F,col.names=F,quote=F)
 
-
+##Create new gene expression and PC file
+ck.genes = read.table("ENSGList.DConly.Ordered.txt")
+dc.genes= read.table('qqnorm.500ht.gccor.covcor.genenames.txt')
+gene.overlap = match(ck.genes,dc.genes)
+sum(is.na(gene.overlap))
+newck.genes = na.omit(gene.overlap)
+dc.exprs = read.table("qqnorm.500ht.gccor.newcovcor.bimbam.gz")
+exprs = dc.exprs[newck,newck.genes]
+dim(exprs)
+write.table(xhtpca,"qqnorm.newck.gccor.newcovcor.pcs",col.names=F,row.names=F,quote=F,sep="\t")
+htpca = prcomp(exprs,scale.=TRUE)
+xhtpca = htpca$x
+write.table(xhtpca,"qqnorm.newck.gccor.newcovcor.pcs",col.names=F,row.names=F,quote=F,sep="\t")
 
 ###BROKEN
 ### Make Venn of overlapping genes between LCLs and Hutt iPSC #######
