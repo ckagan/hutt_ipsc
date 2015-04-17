@@ -116,15 +116,21 @@ for (i in 1:length(orderlist)) {
 write.table(ordermat,"addSNP.1415.newck.ordered.txt",row.name=F,col.names=F,quote=F)
 
 ##Create new gene expression and PC file
+new.ck.fam = read.table('hutt.imputed.newck.fam')[,2]
+dc = read.table("hutt.imputed.500ht.fam")[,2]
+newck = match(new.ck.fam,dc)
 ck.genes = read.table("ENSGList.DConly.Ordered.txt")
-dc.genes= read.table('qqnorm.500ht.gccor.covcor.genenames.txt')
-gene.overlap = match(ck.genes,dc.genes)
+dc.genes= read.table('qqnorm.500ht.gccor.newcovcor.genenames.txt')
+gene.overlap = match(ck.genes$V1, dc.genes$V1)
 sum(is.na(gene.overlap))
 newck.genes = na.omit(gene.overlap)
 dc.exprs = read.table("qqnorm.500ht.gccor.newcovcor.bimbam.gz")
 exprs = dc.exprs[newck,newck.genes]
+
 dim(exprs)
-write.table(xhtpca,"qqnorm.newck.gccor.newcovcor.pcs",col.names=F,row.names=F,quote=F,sep="\t")
+
+write.table(exprs,"qqnorm.newck.gccor.newcovcor.bimbam.gz",col.names=F,row.names=F,quote=F,sep="\t")
+
 htpca = prcomp(exprs,scale.=TRUE)
 xhtpca = htpca$x
 write.table(xhtpca,"qqnorm.newck.gccor.newcovcor.pcs",col.names=F,row.names=F,quote=F,sep="\t")
