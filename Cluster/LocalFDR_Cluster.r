@@ -48,8 +48,3 @@ for(i in 5:length(pcs)){
       rm(master)
 }
 dev.off()
-
-##Next plot the amount of FDR 1% by each PC regression to optimize
-pdf("eQTLCalls.pdf")
-plot(pcs,qcounts,xlab="Number of PCs Removed",ylab="No. of eQTLs",type="b",pch=20)
-dev.off()
