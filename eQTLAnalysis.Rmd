@@ -66,5 +66,10 @@ dev.off()
 pdf("eQTLCalls.pdf")
 plot(pcs,qcounts,xlab="Number of PCs Removed",ylab="No. of eQTLs",type="b",pch=20)
 dev.off()
+
+##Create Gene List for DAVID background
+genes = read.table('PC 17 _eQTLResults.LocalFDR.txt')
+genelist = genes[unique(genes$V1),]
+write.table(genelist$V1, 'eQTLGeneList.txt', sep='\t', quote=F, row.names=F)
 ```
 
