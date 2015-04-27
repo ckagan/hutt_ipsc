@@ -1,6 +1,7 @@
 ---
 title: "Hutterite iPSC Panel Pluritest"
 author: "Courtney Kagan"
+output: pdf_document
 ---
 
 Last updated: `r Sys.Date()`
@@ -15,7 +16,7 @@ Set working directory on spudhead
 cd /mnt/gluster/internal_supp/hutt_ipsc
 ```
 ```{r include=FALSE}
-setwd("~/Arrays/Hutt iPSCs")
+setwd("C:/Users/Courtney/Dropbox/LCL-iPSC/GEMMA eQTLs/Hutt iPSCs")
 load("C:/Users/Courtney/Dropbox/LCL-iPSC/Pluritestsub_REnvironment.unk")
 sample.names = 'Sample_names.txt'
 arraydata = 'YGilad-CK-Mar6-15-ProbeLevelData-NotNormalized-NoBGSubtracted-FinalReport.txt'
