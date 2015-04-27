@@ -11,20 +11,21 @@ for(i in 1:length(pval.pcs.names)){
 }
 pcs.uni = unique(pval.pcs)
 pcs = sort(as.numeric(pcs.uni), decreasing=FALSE)
-
+print("Starting PC analysis")
 ##Analysis for loop
 qcounts = c()
 for(i in 1:length(pcs)){
   j = as.character(pcs[i])
   master <- read.table(paste("/mnt/gluster/data/internal_supp/hutt_ipsc/Genotypes/ByChr/PC",j,"_eQTLResults.LocalFDR.txt"),header=T)
   ##Create 1% FDR files
-  subset = master[master$corrected < 0.01,]
-  write.table(subset, paste("/mnt/gluster/data/internal_supp/hutt_ipsc/Genotypes/ByChr/PC",j,"_eQTLResults.LocalFDR.1%.txt", sep=""), quote=F, row.names=F, sep='\t')
+  #subset = master[master$corrected < 0.01,]
+  #write.table(subset, paste("/mnt/gluster/data/internal_supp/hutt_ipsc/Genotypes/ByChr/PC",j,"_eQTLResults.LocalFDR.1%.txt", sep=""), quote=F, row.names=F, sep='\t')
   #Get the number of gene/SNP pairs at a 1% FDR
   qcount = sum(master$corrected < 0.01)
   qcounts[i] = qcount
 }
 
 pdf('PCAnalysis.pdf')
-plot(1:23,qcounts,xlab="Number of PCs Removed",ylab="No. of eQTLs at Local FDR 1%",type="b",pch=20)
+plot(1:length(pcs),qcounts,xlab="Number of PCs Removed",ylab="No. of eQTLs at Local FDR 1%",type="b",pch=20)
 dev.off()
+print("Finished PC analysis")

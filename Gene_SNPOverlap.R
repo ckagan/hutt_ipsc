@@ -1,4 +1,4 @@
-setwd("C:/Users/Courtney/Desktop/GEMMATest")
+setwd("C:/Users/Courtney/Dropbox/LCL-iPSC/GEMMA eQTLs/Hutt iPSCs")
 master = read.table('hutt.imputed.1Mb.chrmspecific.mastercols.txt', header=F, sep='\t')
 genelist = rownames(expr_gene)
 genelist = as.matrix(genelist)
@@ -20,43 +20,60 @@ which(is.na(gene.bed[,2]))
 ###In excel remove duplicate ENSG and sort ExpressedGeneList Based on Chromosome and then start##
 gene.bed.ordered= read.table('ExpressedGeneList.txt', header=T, sep='\t')
 masterlist= read.table('ENSG_CAGETSS.txt', header=T, sep='\t')
-CAGE.bed = merge(gene.bed.ordered, masterlist, by.x = "GeneID", by.y = "ENSG", all.x = T, all.y = F, sort=F)
-which(is.na(CAGE.bed[,7]))
-nas = c(9203:11237)
-CAGE.bed.DConly = CAGE.bed[-nas,]
+CAGE.bed.DConly = merge(gene.bed.ordered, masterlist, by.x = "GeneID", by.y = "ENSG", all.x = F, all.y = F, sort=F)
 which(is.na(CAGE.bed.DConly[,7]))
-write.table(CAGE.bed.DConly, 'Hutt.CAGE.Overlap.txt', sep='\t', quote=F,row.names=F)
+# nas = c(9203:11237)
+# CAGE.bed.DConly = CAGE.bed[-nas,]
+# which(is.na(CAGE.bed.DConly[,7]))
+#write.table(CAGE.bed.DConly, 'Hutt.CAGE.Overlap.txt', sep='\t', quote=F,row.names=F)
 
 setwd("C:/Users/Courtney/Dropbox/LCL-iPSC/GEMMA eQTLs/Hutt iPSCs")
-##To directly filter mastercolum file
-ENSG.ordered = as.matrix(CAGE.bed$GeneID)
-mastercol= read.table('hutt.imputed.1Mb.mastercols.txt', header=F, sep='\t')
-colnames(mastercol) = c("ENSG", "rs", "Gene", "Pos", "Chr")
-mastercol.CK = merge(mastercol, ENSG.ordered, by.x = "ENSG", by.y = "V1", all.x = F, all.y = F, sort=F)
+##To directly filter mastercolum file - didn't work
+# ENSG.ordered = as.matrix(CAGE.bed$GeneID)
+# mastercol= read.table('hutt.imputed.1Mb.mastercols.txt', header=F, sep='\t')
+# colnames(mastercol) = c("ENSG", "rs", "Gene", "Pos", "Chr")
+# mastercol.CK = merge(mastercol, ENSG.ordered, by.x = "ENSG", by.y = "V1", all.x = F, all.y = F, sort=F)
 
 ### Re-order Expression and filter out only DC expressed
+expr_gene = read.table('OriginGeneExpression_Normalized.txt', header=T, as.is=T, sep='\t', row.names=1)
 exprnames = as.matrix(row.names(expr_gene))
-idcoefs = read.table("/mnt/lustre/home/cusanovich/500HT/addSNP.coef.3671.square")
+
 ## In excel remove the duplicate genes
 matcher = read.table("Hutt.CAGE.Overlap.txt", header =T, sep='\t')
-ordered.ENSG = matcher$GeneID
+matcher = CAGE.bed
 matcherids = matcher$GeneID
 matcherind = match(matcherids,exprnames[,1])
 exprs.o = expr_gene[matcherind,]
-exprs.o.t = t(exprs.o)
+samplenames = read.table('Covars.txt', header=T, sep ='\t')
+##Re-order samplenames based on array location
+samplenames = samplenames[order(samplenames$Order),]
+hearts = c(56:60,67:72)
+samplenames = samplenames[-hearts,]
+colnames(exprs.o)= samplenames$Findiv
+ck = read.table("hutt.imputed.73subset.fam")[,2]
+overlap.indiv = match(ck,colnames(exprs.o))
+exprs.ordered = exprs.o[,overlap.indiv]
+exprs.o.t = t(exprs.ordered)
+write.table(exprs.o.t,"Expr.DConly.ordered.txt",row.names=F,col.names=F,quote=F,sep="\t")
 
 ## Create PCA file based on re-ordered expression with only Darren's expressed genes
-exprs = read.table("Expr.DConly.Ordered.txt",header=F,sep="\t")
+exprs = read.table("Expr.DConly.ordered.txt",header=F,sep="\t")
 htpca = prcomp(exprs,scale.=TRUE)
 xhtpca = htpca$x
-write.table(xhtpca,"hutt.DConly.Ordered.pcs.txt",col.names=F,row.names=F,quote=F,sep="\t")
+pca_results = summary(htpca)
+pca_table = pca_results$importance
+write.table(pca_table,"PC_importance_HuttiPSCs.txt",col.names=T,row.names=T,quote=F,sep="\t")
+write.table(xhtpca,"hutt.DConly.ordered.pcs",col.names=F,row.names=F,quote=F,sep="\t")
 
+reordercovar = match(ck,samplenames$Findiv)
+covar.ordered = samplenames[reordercovar,]
 
 pcs.o = pcs[matcherind,]
+idcoefs = read.table("/mnt/lustre/home/cusanovich/500HT/addSNP.coef.3671.square")
 idcoefs.o = idcoefs[matcherind,matcherind]
 write.table(ordered.ENSG,"ENSGList.DConly.Ordered.txt",row.names=F,col.names=F,quote=F,sep="\t")
-write.table(exprs.o.t,"Expr.DConly.Ordered.txt",row.names=T,col.names=F,quote=F,sep="\t")
-##In excel sort by indiv and remove row names(individuals)
+
+
 x.pca.sum = summary(htpca)
 x.pca.sum$importance[2,1]
 htpca.unsc = prcomp(exprs.o,scale.=F)
@@ -89,19 +106,23 @@ write.table(ordermat,"addSNP.1415.ordered.txt",row.name=F,col.names=F,quote=F)
 ck = read.table("hutt.imputed.73subset.fam")[,2]
 dc = read.table("hutt.imputed.500ht.fam")[,2]
 overlap = match(ck,dc)
-sum(is.na(overlap))
-#18 individual not in Darren's study
-fillers = sample(1:431, 18)
+# sum(is.na(overlap))
+# #18 individual not in Darren's study
+# fillers = sample(1:431, 18)
 ##Generated until no overlap was left
-match(overlap,fillers)
-ck.only = na.omit(overlap)
-ck_fillers = append(ck.only,fillers)
-newck = sort(ck_fillers, decreasing=FALSE)
-dc.fam = read.table("hutt.imputed.500ht.fam")
-new.ck.fam = dc.fam[newck,]
-write.table(new.ck.fam, 'hutt.imputed.newck.fam',row.name=F,col.names=F,quote=F)
+fillers = read.table('FindivList.newck.txt')[,2]
+confirm = match(fillers, ck)
+# match(overlap,fillers)
+# ck.only = na.omit(overlap)
+# ck_fillers = append(ck.only,fillers)
+# newck = sort(ck_fillers, decreasing=FALSE)
+newck = match(fillers,dc)
+# dc.fam = read.table("hutt.imputed.500ht.fam")
+# new.ck.fam = dc.fam[newck,]
+# write.table(new.ck.fam, 'hutt.imputed.newck.fam',row.name=F,col.names=F,quote=F)
 
-orderlist = new.ck.fam$V2
+##Read in new fam from Plink after filtering
+orderlist = read.table('hutt.imputed.newck.fam')[,2]
 rawmat = read.table("addSNP1415.coef.3671",header=T)
 ordermat = matrix(NA,length(orderlist),length(orderlist))
 for (i in 1:length(orderlist)) {
@@ -124,12 +145,12 @@ dc.genes= read.table('qqnorm.500ht.gccor.newcovcor.genenames.txt')
 gene.overlap = match(ck.genes$V1, dc.genes$V1)
 sum(is.na(gene.overlap))
 newck.genes = na.omit(gene.overlap)
-dc.exprs = read.table("qqnorm.500ht.gccor.newcovcor.bimbam.gz")
+dc.exprs = read.table("qqnorm.500ht.gccor.newcovcor.ordered.bimbam")
 exprs = dc.exprs[newck,newck.genes]
 
 dim(exprs)
 
-write.table(exprs,"qqnorm.newck.gccor.newcovcor.bimbam.gz",col.names=F,row.names=F,quote=F,sep="\t")
+write.table(exprs,"qqnorm.newck.gccor.newcovcor.bimbam",col.names=F,row.names=F,quote=F,sep="\t")
 
 htpca = prcomp(exprs,scale.=TRUE)
 xhtpca = htpca$x
