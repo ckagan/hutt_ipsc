@@ -101,7 +101,7 @@ write.table(ordermat,"addSNP.1415.ordered.txt",row.name=F,col.names=F,quote=F)
 #   ordermat[inds2,inds1] = rawmat[i,3]
 # }
 
-
+setwd("C:/Users/Courtney/Dropbox/LCL-iPSC/GEMMA eQTLs/Hutt iPSCs")
 ##Pulling out overlapping findivs
 ck = read.table("hutt.imputed.73subset.fam")[,2]
 dc = read.table("hutt.imputed.500ht.fam")[,2]
@@ -154,6 +154,10 @@ write.table(exprs,"qqnorm.newck.gccor.newcovcor.bimbam",col.names=F,row.names=F,
 
 htpca = prcomp(exprs,scale.=TRUE)
 xhtpca = htpca$x
+pca_results = summary(htpca)
+pca_table = pca_results$importance
+write.table(pca_table,"PC_importance_HuttLCLs.txt",col.names=T,row.names=T,quote=F,sep="\t")
+
 write.table(xhtpca,"qqnorm.newck.gccor.newcovcor.pcs",col.names=F,row.names=F,quote=F,sep="\t")
 
 ###BROKEN
