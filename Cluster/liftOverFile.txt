@@ -1,5 +1,22 @@
 location = read.table("/mnt/gluster/data/internal_supp/hutt_ipsc/Genotypes/hutt.imputed.73subset.created.bed") 
 colnames(location)= c("Chr", "Start", "Stop", "SNP")
+j= "11"
+PC.pvals <- list.files(path = "/mnt/gluster/data/internal_supp/hutt_ipsc/Genotypes/ByChr/",pattern = paste("PC", j, ".imputed.1Mb.bonferroni.regressPCs.gemma.chosen.txt", sep=""),full.names=T)
+  #For each PC combine all chrs
+  master=do.call("rbind", lapply(PC.pvals, read.table, header = FALSE))
+  print(paste("PC",j,dim(master)))
+  qs = p.adjust(master$V4,method="BH")
+all = cbind(master,qs)
+colnames(all)= c("ENSG", "Variant", "Unc", "Bonf", "FDR")
+merged = merge(all, location, by.x = "Variant", by.y = "SNP", all.x=TRUE, all.y=FALSE)
+qcount = sum(qs < 0.05)
+  print(qcount)
+write.table(merged, paste("/mnt/gluster/data/internal_supp/hutt_ipsc/GEMMAOutput/eQTLs/PC",j,"_eQTLResults.Corrected.bed",sep=""), col.names=F, sep='\t', quote=F, row.names=F)
+
+remove(master)
+location = read.table("/mnt/gluster/data/internal_supp/hutt_ipsc/Genotypes/hutt.imputed.73subset.created.bed") 
+colnames(location)= c("Chr", "Start", "Stop", "SNP")
+j= "11"
 PC.pvals <- list.files(path = "/mnt/gluster/data/internal_supp/hutt_ipsc/Genotypes/ByChr/",pattern = paste("PC", j, ".imputed.1Mb.bonferroni.regressPCs.gemma.eqtls.txt", sep=""),full.names=T)
   #For each PC combine all chrs
   master=do.call("rbind", lapply(PC.pvals, read.table, header = FALSE))
@@ -14,7 +31,7 @@ id = seq(1:dim(merged)[1])
 final = cbind(merged,id)
 write.table(final[,5:8], paste("/mnt/gluster/data/internal_supp/hutt_ipsc/GEMMAOutput/eQTLs/PC",j,"_eQTLResults.bed",sep=""), col.names=F, sep='\t', quote=F, row.names=F)
 ##In the UCSC genome browser use liftOver to convert coord (257 not converted)
-hg18 = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/GEMMAOutput/eQTLs/hg18Converted_PC12eQTLResults.bed')
+hg18 = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/GEMMAOutput/eQTLs/hg18Converted_PC11eQTLResults.bed')
 colnames(hg18) = c("Chr18", "Start18", "Stop18", "ID")
 combo = merge(final, hg18, by.x = "id", by.y = "ID", all.x=TRUE, all.y=FALSE)
 sum(is.na(combo$Chr18))
