@@ -192,7 +192,7 @@ colnames(expr_gene) = colnames(expr_quant.all)
 
 expr_gene = read.table('OriginGeneExpression_Normalized.txt', header=T, as.is=T, sep='\t', row.names=1)
 samplenames = read.table('Covars.txt', header=T, sep ='\t')
-Re-order samplenames based on array location
+#Re-order samplenames based on array location
 samplenames = samplenames[order(samplenames$Order),]
 
 hearts = c(56:60,67:72)
@@ -318,9 +318,7 @@ dev.off()
 x.pca = prcomp(na.omit(t(expr_gene)), center = T,scale=T)
 x.pca.sum = summary(x.pca)
 pdf(file = "PCA.pdf")
-plot(x.pca$x[,1], x.pca$x[,2], xlab = paste('PC1 (',x.pca.sum$importance[2,1], ')', sep = ''),ylab = paste('PC2 (',
-
-], ')', sep = ''), main = "PC1/2 all data", pch = 20, col = samplenames$Batch)
+plot(x.pca$x[,1], x.pca$x[,2], xlab = paste('PC1 (',x.pca.sum$importance[2,1], ')', sep = ''),ylab = paste('PC2 (',x.pca.sum$importance[2,2], ')', sep = ''), main = "PC1/2 all data", pch = 20, col = samplenames$Batch)
 text(x.pca$x[,1], x.pca$x[,2], samplenames$Batch)
 plot(x.pca$x[,1], x.pca$x[,3], xlab = paste('PC1 (',x.pca.sum$importance[2,1], ')', sep = ''),ylab = paste('PC3 (',x.pca.sum$importance[2,3], ')', sep = ''), main = "PC1/3 all data", col =samplenames$Batch, pch = 20)
 plot(x.pca$x[,1], x.pca$x[,4], xlab = paste('PC1 (',x.pca.sum$importance[2,1], ')', sep = ''),ylab = paste('PC4 (',x.pca.sum$importance[2,4], ')', sep = ''), main = "PC1/4 all data", col ="black", pch = 20)
@@ -373,6 +371,33 @@ lmPCA = function(pca, covars, npcs)
   
   
 }
+
+lmPCA_heatmap = function(pca, covars, npcs)
+{
+  results<-c()
+  for (f in covars) {
+    for (i in 1:npcs)
+    {
+      s = summary(lm(pca$x[,i]~f));
+      results<-c(results,pf(s$fstatistic[[1]],
+                            s$fstatistic[[2]],s$fstatistic[[3]], lower.tail = FALSE))
+    }
+  }
+  resultsM<-matrix(nrow = length(covars), ncol = npcs, data =
+                     results, byrow = TRUE)
+  resultsM
+  
+  
+}
+pcaresults.heatmap = lmPCA_heatmap(x.pca,covars,73)
+rownames(pcaresults.heatmap) = c("batch", "sex","age","pluri","novel","matrigel bottle", "passage")
+myCol <- c("red", "orange", "yellow", "grey")
+# Defining breaks for the color scale
+myBreaks <- c(0, 1e-5, 1e-2, 0.05, 1)
+
+heatmap.2(pcaresults.heatmap, col=myCol, breaks=myBreaks, margins=c(5,7),trace="none",main="Gene Expression Correlation", key=F, keysize=1.5,density.info="none",cexCol=0.7, cexRow = 0.8, Rowv = FALSE, Colv = FALSE, scale="none")
+legend("topleft", fill = myCol, cex=0.8,
+legend = c("<1e-5", "1e-5 to 0,01", "0.01 to 0.05", ">0.05"))
 
 pcaresults = lmPCA(x.pca,covars,4)
 rownames(pcaresults) = c("batch", "sex","age","pluri","novel","matrigel bottle", "passage")

@@ -1,21 +1,5 @@
 setwd("C:/Users/Courtney/Dropbox/LCL-iPSC/GEMMA eQTLs/Hutt iPSCs")
-master = read.table('hutt.imputed.1Mb.chrmspecific.mastercols.txt', header=F, sep='\t')
-genelist = rownames(expr_gene)
-genelist = as.matrix(genelist)
-colnames(genelist) = c("GeneID")
-colnames(master) = c("Gene", "rs", "Num", "Count", "Chr")
-#Merge actual list with reference information from good probe document
-chrlist.gene = merge(genelist, master, by.x = "GeneID", by.y = "Gene", all.x = T, all.y = F, sort=F)
-clean.chrlist.gene = chrlist.gene[!duplicated(chrlist.gene$GeneID), ]
-which(is.na(chrlist.gene[,2]))
-chrlist.gene[2292650,]
 
-
-ensg = cbind(goodprobes[,1:3], goodprobes[,7], goodprobes[,5:6])
-gene.bed = merge(genelist, ensg, by.x = "GeneID", by.y = "goodprobes[, 7]", all.x = T, all.y = F, sort=F)
-which(is.na(gene.bed[,2]))
-# No unique values - however multiple entries for ~5k genes
-#write.table(gene.bed, 'ExpressedGeneList.txt', sep='\t', row.names=F, quote=F)
 
 ###In excel remove duplicate ENSG and sort ExpressedGeneList Based on Chromosome and then start##
 gene.bed.ordered= read.table('ExpressedGeneList.txt', header=T, sep='\t')
@@ -159,6 +143,43 @@ pca_table = pca_results$importance
 write.table(pca_table,"PC_importance_HuttLCLs.txt",col.names=T,row.names=T,quote=F,sep="\t")
 
 write.table(xhtpca,"qqnorm.newck.gccor.newcovcor.pcs",col.names=F,row.names=F,quote=F,sep="\t")
+
+
+##Create files for iPSC all genes
+expr_gene = read.table('OriginGeneExpression_Normalized.txt', header=T, as.is=T, sep='\t', row.names=1)
+exprnames = as.matrix(row.names(expr_gene))
+gene.bed.ordered= read.table('ensemblCAGETSS_ipsc_sorted.bed', header=F, sep='\t')
+nosex = gene.bed.ordered[1:10250,]
+
+samplenames = read.table('Covars.txt', header=T, sep ='\t')
+##Re-order samplenames based on array location
+samplenames = samplenames[order(samplenames$Order),]
+hearts = c(56:60,67:72)
+samplenames = samplenames[-hearts,]
+
+colnames(expr_gene)= samplenames$Findiv
+ck = read.table("hutt.imputed.73subset.fam")[,2]
+overlap.indiv = match(ck,colnames(expr_gene))
+overlap.exprs = match(nosex$V4, rownames(expr_gene))
+exprs.ordered = expr_gene[overlap.exprs,overlap.indiv]
+exprs.o.t = t(exprs.ordered)
+write.table(exprs.o.t,"Expr.allgenes.ordered.bimbam",row.names=F,col.names=F,quote=F,sep="\t")
+
+## Create PCA file based on re-ordered expression with all expressed genes
+exprs = read.table("Expr.allgenes.ordered.bimbam",header=F,sep="\t")
+htpca = prcomp(exprs,scale.=TRUE)
+xhtpca = htpca$x
+pca_results = summary(htpca)
+pca_table = pca_results$importance
+write.table(pca_table,"PC_importance_HuttiPSCs_allgenes.txt",col.names=T,row.names=T,quote=F,sep="\t")
+write.table(xhtpca,"hutt.allgenes.ordered.pcs",col.names=F,row.names=F,quote=F,sep="\t")
+write.table(nosex$V4,"ENSGList.allgenes.Ordered.txt",row.names=F,col.names=F,quote=F,sep="\t")
+
+for (i in 1:22) {
+  subset = nosex[nosex$V1 == paste("chr", i, sep=""),]
+  write.table(subset$V4, paste("Genes.all.Ordered.chr", i,".genes.txt", sep=""), col.names=F, row.names=F,quote=F, sep='\t')
+}
+write.table(nosex,"Hutt.CAGE.allgenes.bed",row.names=F,col.names=F,quote=F,sep="\t")
 
 ###BROKEN
 ### Make Venn of overlapping genes between LCLs and Hutt iPSC #######

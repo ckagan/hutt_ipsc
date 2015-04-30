@@ -1,0 +1,31 @@
+library(plyr)
+library(stringr)
+
+##Tocheck that all chrs are completed
+#Get PC names
+all.pvals <- list.files(path = "/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenes/output/",pattern=".imputed.1Mb.bonferroni.regressPCs.gemma.chosen.txt",full.names=T)
+pval.pcs.names = str_split(all.pvals,"[.]")
+pval.pcs = c()
+for(i in 1:length(pval.pcs.names)){
+  pval.pcs[i] = str_split(pval.pcs.names[[i]][2],"PC")[[1]][2]
+}
+pcs.uni = unique(pval.pcs)
+pcs = sort(as.numeric(pcs.uni), decreasing=FALSE)
+print(pcs)
+##Analysis for loop
+qcounts = c()
+for(i in 1:length(pcs)){
+  j = as.character(pcs[i])
+  PC.pvals <- list.files(path = "/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenes/output/",pattern = paste("PC", j, ".imputed.1Mb.bonferroni.regressPCs.gemma.chosen.txt", sep=""),full.names=T)
+  #For each PC combine all chrs
+  master=do.call("rbind", lapply(PC.pvals, read.table, header = FALSE))
+  print(paste("PC",j,dim(master)))
+  qs = p.adjust(master$V4,method="BH")
+  qcount = sum(qs < 0.05)
+  print(qcount)
+rm(master)
+  }
+print(qcounts)
+pdf("/mnt/gluster/data/internal_supp/hutt_ipsc/Genotypes/ByChr/eQTLs.DCcorrection.pdf")
+plot(pcs,qcounts,xlab="Number of PCs Removed",ylab="No. of eQTLs",type="b",pch=20)
+dev.off()
