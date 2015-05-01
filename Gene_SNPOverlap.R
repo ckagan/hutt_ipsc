@@ -144,6 +144,46 @@ write.table(pca_table,"PC_importance_HuttLCLs.txt",col.names=T,row.names=T,quote
 
 write.table(xhtpca,"qqnorm.newck.gccor.newcovcor.pcs",col.names=F,row.names=F,quote=F,sep="\t")
 
+#Create new gene expr and pc of DC data, but only on 73 indivs (all dc genes)
+new.ck.fam = read.table('hutt.imputed.newck.fam')[,2]
+dc = read.table("hutt.imputed.500ht.fam")[,2]
+newck = match(new.ck.fam,dc)
+dc.exprs = read.table("qqnorm.500ht.gccor.newcovcor.ordered.bimbam")
+exprs = dc.exprs[newck,]
+
+dim(exprs)
+
+write.table(exprs,"qqnorm.newck.allgenes.gccor.newcovcor.bimbam",col.names=F,row.names=F,quote=F,sep="\t")
+
+htpca = prcomp(exprs,scale.=TRUE)
+xhtpca = htpca$x
+pca_results = summary(htpca)
+pca_table = pca_results$importance
+write.table(pca_table,"PC_importance_HuttLCLs_allgenes.txt",col.names=T,row.names=T,quote=F,sep="\t")
+
+write.table(xhtpca,"qqnorm.newck.allgenes.gccor.newcovcor.pcs",col.names=F,row.names=F,quote=F,sep="\t")
+##Still not correct...
+
+
+##Trying new files to get the ordering correct
+new.ck.fam = read.table('hutt.imputed.newck.fam')[,2]
+dc = read.table("qqnorm.500ht.gccor.newcovcor.findivs.txt")
+newck = match(new.ck.fam,dc$V1)
+dc.exprs = read.table("qqnorm.500ht.gccor.newcovcor.bimbam.gz")
+exprs = dc.exprs[newck,]
+dim(exprs)
+
+write.table(exprs,"qqnorm.newck.allgenes.gccor.newcovcor.bimbam",col.names=F,row.names=F,quote=F,sep="\t")
+
+htpca = prcomp(exprs,scale.=TRUE)
+xhtpca = htpca$x
+pca_results = summary(htpca)
+pca_table = pca_results$importance
+write.table(pca_table,"PC_importance_HuttLCLs_allgenes.txt",col.names=T,row.names=T,quote=F,sep="\t")
+
+write.table(xhtpca,"qqnorm.newck.allgenes.gccor.newcovcor.pcs",col.names=F,row.names=F,quote=F,sep="\t")
+
+
 
 ##Create files for iPSC all genes
 expr_gene = read.table('OriginGeneExpression_Normalized.txt', header=T, as.is=T, sep='\t', row.names=1)
