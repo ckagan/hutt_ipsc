@@ -49,8 +49,7 @@ dev.off()
 
 
 labs = c("liver", "art", "tib", "eso","eso2","heart","lung","musc","nerve","skin","stom","wb","ipsc2")
-tissues = c(liver
-            , art, tib, eso,eso2,heart,lung,musc,nerve,skin,stom,wb,ipsc2)
+tissues = c(liver, art, tib, eso,eso2,heart,lung,musc,nerve,skin,stom,wb,ipsc2)
 for (k in 1:length(tissues)){
   table= matrix(data=NA, nrow=13, ncol=3)
   props=c()
@@ -89,6 +88,37 @@ for (i in 1:12){
 counts = table(props.ipsconly)
 plot(1:12, props.ipsconly, main = "Tissue Overlap with iPSCs - Overlapping genes only")
 
-data = as.matrix(table[1:12,])
-barplot(data)
-counts <- table(data$V1, data$V2, data$V3)
+
+subset.size= matrix(data=NA, nrow=12, ncol=2)
+for (i in 1:12){
+  j = tissues[i]
+  m = ipsc.genes
+  subs = match(j$Gen_ID,m$Gen_ID)
+  subs2 = na.omit(subs)
+  subset = as.data.frame(ipsc.genes[subs2,])
+  colnames(subset) = c("Gen_ID")
+  assign(paste("subset.",labs[i],sep=""),subset)
+  total = length(subset$Gen_ID)
+  subset.size[i,1] = labs[i]
+  subset.size[i,2] = total
+}
+
+tissues.subset = c(subset.liver, subset.art, subset.tib, subset.eso,subset.eso2,subset.heart,subset.lung,subset.musc,subset.nerve,subset.skin,subset.stom,subset.wb,ipsc2)
+##1000 perms per tissue type
+perm.output= matrix(data=NA, nrow=12, ncol=100000)
+for(i in 1:100000) {
+perm = sample(1:10250, 1028, replace=F)
+perm.data = as.data.frame(ipsc.genes[perm,])
+colnames(perm.data)=c("Gen_ID")
+for (k in 1:12){
+  j = tissues.subset[k] 
+  m = perm.data
+  test = m$Gen_ID %in% j$Gen_ID
+  tr = sum(test == T)
+  perm.output[k,i] = tr
+}
+}
+
+for(i in 1:12){
+print(sum(perm.output[i,] > table[i,3]))
+}
