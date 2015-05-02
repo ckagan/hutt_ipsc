@@ -1,0 +1,44 @@
+location = read.table("/mnt/gluster/data/internal_supp/hutt_ipsc/Genotypes/hutt.imputed.73subset.created.bed") 
+colnames(location)= c("Chr", "Start", "Stop", "SNP")
+j= "13"
+PC.pvals <- list.files(path = "/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenes/output/",pattern = paste("PC", j, ".imputed.1Mb.bonferroni.regressPCs.gemma.chosen.txt", sep=""),full.names=T)
+  #For each PC combine all chrs
+  master=do.call("rbind", lapply(PC.pvals, read.table, header = FALSE))
+  print(paste("PC",j,dim(master)))
+  qs = p.adjust(master$V4,method="BH")
+all = cbind(master,qs)
+colnames(all)= c("ENSG", "Variant", "Unc", "Bonf", "FDR")
+merged = merge(all, location, by.x = "Variant", by.y = "SNP", all.x=TRUE, all.y=FALSE)
+qcount = sum(qs < 0.05)
+  print(qcount)
+write.table(merged, paste("/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenes/eQTLs/PC",j,"_eQTLResults.Corrected.bed",sep=""), col.names=F, sep='\t', quote=F, row.names=F)
+
+remove(master)
+#location = read.table("/mnt/gluster/data/internal_supp/hutt_ipsc/Genotypes/hutt.imputed.73subset.created.bed") 
+#colnames(location)= c("Chr", "Start", "Stop", "SNP")
+j= "13"
+PC.pvals <- list.files(path = "/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenes/output/",pattern = paste("PC", j, ".imputed.1Mb.bonferroni.regressPCs.gemma.eqtls.txt", sep=""),full.names=T)
+  #For each PC combine all chrs
+  master=do.call("rbind", lapply(PC.pvals, read.table, header = FALSE))
+  print(paste("PC",j,dim(master)))
+  qs = p.adjust(master$V3,method="BH")
+all = cbind(master,qs)
+colnames(all)= c("ENSG", "Variant", "Unc", "FDR")
+merged = merge(all, location, by.x = "Variant", by.y = "SNP", all.x=TRUE, all.y=FALSE)
+qcount = sum(qs < 0.05)
+  print(qcount)
+id = seq(1:dim(merged)[1])
+final = cbind(merged,id)
+write.table(final[,5:8], paste("/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenes/eQTLs/PC",j,"_eQTLResults.bed",sep=""), col.names=F, sep='\t', quote=F, row.names=F)
+##In the UCSC genome browser use liftOver to convert coord (316 not converted)
+hg18 = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenes/eQTLs/hg18Converted_PC13eQTLResults.bed')
+colnames(hg18) = c("Chr18", "Start18", "Stop18", "ID")
+combo = merge(final, hg18, by.x = "id", by.y = "ID", all.x=TRUE, all.y=FALSE)
+sum(is.na(combo$Chr18))
+rm = which(is.na(combo$Chr18))
+combo.clean = combo[-rm,]
+write.table(combo.clean, paste("/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenes/eQTLs/PC",j,"_eQTLResults.All.Corrected.hg18.txt",sep=""), col.names=T, sep='\t', quote=F, row.names=F)
+
+subset=merged$FDR <0.05
+out = merged[subset,]
+write.table(out[,5:7], paste("/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenes/eQTLs/PC",j,"_SigeQTLResultsOnly.bed",sep=""), col.names=F, sep='\t', quote=F, row.names=F)

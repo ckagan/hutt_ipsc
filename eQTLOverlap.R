@@ -1,4 +1,4 @@
-setwd("C:/Users/Courtney/Desktop/GEMMATest/Enrichment")
+setwd("C:/Users/Courtney/Dropbox/LCL-iPSC/GEMMA eQTLs/GEMMATest/Enrichment")
 liver = read.table('Adipose.eqtl.txt', header=T)
 art = read.table('Artery_Aorta.eqtl.txt', header=T)
 tib = read.table('Artery_Tibial.eqtl.txt', header=T)
@@ -20,7 +20,6 @@ colnames(ipsc2) = c("Gen_ID")
 ipsc.genes = read.table('ENSGList.allgenes.Ordered.txt')
 colnames(ipsc.genes) = c("Gen_ID")
 
-remove(all)
 all=c()
 all = c(as.character(CAGETSS$ENSG),as.character(liver$Gen_ID), as.character(ipsc2$Gen_ID),as.character(art$Gen_ID),as.character(tib$Gen_ID))
 all = unique(all)
@@ -50,8 +49,10 @@ dev.off()
 
 
 labs = c("liver", "art", "tib", "eso","eso2","heart","lung","musc","nerve","skin","stom","wb","ipsc2")
-tissues = c(liver, art, tib, eso,eso2,heart,lung,musc,nerve,skin,stom,wb,ipsc2)
+tissues = c(liver
+            , art, tib, eso,eso2,heart,lung,musc,nerve,skin,stom,wb,ipsc2)
 for (k in 1:length(tissues)){
+  table= matrix(data=NA, nrow=13, ncol=3)
   props=c()
   for (i in 1:length(tissues)){
     j = tissues[i]
@@ -61,27 +62,33 @@ for (k in 1:length(tissues)){
     total = length(j$Gen_ID)
     prop = tr/total
     props[i]=prop
+    table[i,1]=total
+    table[i,2] =tr
   }
-  plot(1:13, props, main = paste("Tissue Overlap with", labs[k]))
+  plot(1:12, props[1:12], main = paste("Tissue Overlap with", labs[k]))
 }
 
 
-#Finding how many from their data is tested in mine
-
-props=c()
-for (i in 1:length(tissues)){
+#Finding how many from their data is tested in mine and getting a proportion only for that
+props.ipsconly=c()
+for (i in 1:12){
   j = tissues[i]
   m = ipsc.genes
-  test = m$Gen_ID %in% j$Gen_ID
-  subs = which(test==T)
-  subset = j[subs]
-  
+  subs = match(j$Gen_ID,m$Gen_ID)
+  subs2 = na.omit(subs)
+  subset = as.data.frame(ipsc.genes[subs2,])
+  colnames(subset) = c("Gen_ID")
+  test = ipsc2$Gen_ID %in% subset$Gen_ID
   tr = sum(test == T)
-  total = length(j$Gen_ID)
+  total = length(subset$Gen_ID)
+  table[i,2] = total
+  table[i,3] = tr
   prop = tr/total
-  props[i]=prop
+  props.ipsconly[i]=prop
 }
+counts = table(props.ipsconly)
+plot(1:12, props.ipsconly, main = "Tissue Overlap with iPSCs - Overlapping genes only")
 
-
-
-
+data = as.matrix(table[1:12,])
+barplot(data)
+counts <- table(data$V1, data$V2, data$V3)
