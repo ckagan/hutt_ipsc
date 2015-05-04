@@ -223,7 +223,7 @@ write.table(nosex,"Hutt.CAGE.allgenes.bed",row.names=F,col.names=F,quote=F,sep="
 
 ###BROKEN
 ### Make Venn of overlapping genes between LCLs and Hutt iPSC #######
-genes <- data.frame(masterlist$ENSG)
+genes <- data.frame(subset$ENSG)
 names(genes) <- "genes"
 make.venn.quad <- function(geneset1, geneset2,geneset1.label, geneset2.label, univ){
   univ$g1 <- univ$probes %in% geneset1

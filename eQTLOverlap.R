@@ -16,6 +16,7 @@ thy = read.table('Thyroid.eqtl.txt', header=T)
 wb = read.table('Whole_Blood.eqtl.txt', header=T)
 ipsc2 = as.data.frame(ipsc$V1)
 colnames(ipsc2) = c("Gen_ID")
+pluri = read.table('Plurigenes.txt', header=T)
 
 ipsc.genes = read.table('ENSGList.allgenes.Ordered.txt')
 colnames(ipsc.genes) = c("Gen_ID")
@@ -45,6 +46,17 @@ make.venn.quad <- function(geneset1, geneset2, geneset3, geneset4, geneset1.labe
 pdf(file = "VennDiagram_DE_FDR5.pdf")
 make.venn.quad(as.character(liver$Gen_ID), as.character(ipsc2$Gen_ID),as.character(art$Gen_ID),as.character(tib$Gen_ID),"liver","ipsc","art","tib" ,univ)
 dev.off()
+
+res=matrix(data=NA, nrow=15418, ncol=13)
+labs = c("liver", "art", "tib", "eso","eso2","heart","lung","musc","nerve","skin","stom","wb","ipsc2")
+tissues = c(liver, art, tib, eso,eso2,heart,lung,musc,nerve,skin,stom,wb,ipsc2)
+  for (i in 1:length(tissues)){
+    m = tissues[i]
+    test = univ$probes %in% m$Gen_ID
+    res[,i] = test
+  }
+res = as.data.frame(res)
+dim(univ[res$V1 == T & res$V2 == T & res$V3 == T & res$V4 == T & res$V5 == T & res$V6 == T & res$V7 == T & res$V8 == T & res$V9 == T & res$V10 == T & res$V11 == T & res$V12 == T & res$V13 == T, ])[1]
 
 
 
