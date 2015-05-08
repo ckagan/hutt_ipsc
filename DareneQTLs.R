@@ -2,6 +2,10 @@ setwd("C:/Users/Courtney/Desktop/eQTLs")
 eqtls= read.table('master.PC62.imputed.1Mb.bonferroni.gccor.newcovcor.regressPCs.gemma.eqtls.txt')
 chosen = read.table('master.PC62.imputed.1Mb.bonferroni.gccor.newcovcor.regressPCs.gemma.chosen.txt')
 
+ck.eqtls = read.table('PC11_eQTLResults.All.Corrected.hg18.txt', header=T)
+ck.chosen =read.table('PC11_eQTLResults.Corrected.hg18.txt', header=T)
+
+
 overlap = match(ipsc.genes$Gen_ID,eqtls$V1)
 over = unique(overlap)
 sub = na.omit(overlap)
@@ -23,7 +27,17 @@ new.dc = cbind(all, qs.all)
 colnames(new.dc) = c("ENSG", "Variant", "Unc", "FDR")
 write.table(new.dc, "Darren_eQTLs_all.corrected.txt", sep='\t', row.names=F, quote=F)
 
+
+new.dc = read.table('Darren_eQTLs_all.corrected.txt', header=T)
+
 #Just working with the bonf corrected
+boverlap = match(chosen$V1, ck.chosen$ENSG)
+bover = unique(boverlap)
+bsub = na.omit(bover)
+bsubset = chosen[bsub,]
+
+
+
 boverlap = match(chosen$V1, ipsc.genes$Gen_ID)
 bover = unique(boverlap)
 bsub = na.omit(bover)
@@ -33,17 +47,20 @@ qs = p.adjust(bsubset$V4,method="BH")
 dcmatrix = cbind(bsubset,qs)
 qcount = sum(dcmatrix$qs < 0.05)
 sig.dc = dcmatrix[dcmatrix$qs < 0.05,]
-test = ipsc$V1 %in% sig.dc$V1
+ipsc = ck.chosen[ck.chosen$BH <0.05,]
+test = ipsc$ENSG %in% sig.dc$V1
 sum(test ==T)
-test2 = sig.dc$V1 %in% ipsc$V1 
+test2 = sig.dc$V1 %in% ipsc$ENSG 
 sum(test2==T)
 
-shared = match(sig.dc$V1, ipsc$V1)
+shared = match(sig.dc$V1, ipsc$ENSG)
 shared.g = na.omit(shared)
 sharedeqtls = sig.dc[shared.g,]
 write.table(sharedeqtls,"SharedeQTLs.txt", sep='\t', quote=F, row.names=F)
-all.eqtls = append(as.character(sig.dc$V1), as.character(ipsc$V1))
+all.eqtls = append(as.character(sig.dc$V1), as.character(ipsc$ENSG))
 write.table(all.eqtls, 'AlleQTLs.txt', quote=F, row.names =F, sep='\t')
+
+library("VennDiagram", lib.loc="~/R/win-library/3.1")
 
 make.venn.pair <- function(geneset1, geneset2, geneset1.label,
                            geneset2.label,universe){
@@ -65,9 +82,10 @@ make.venn.pair <- function(geneset1, geneset2, geneset1.label,
                                         == TRUE), sep=""))
 }
 
+dev.off()
 make.venn.pair(dcmatrix[dcmatrix$qs < 0.05,]$V1,
-               ipsc$V1,  "LCL eQTLs",
-               "iPSC eQTLs", ipsc.genes)
+               ipsc$ENSG,  "LCL eQTLs",
+               "iPSC eQTLs", dcmatrix$V1)
 
 # make.venn.pair(pluri$PluripotencyGenes,
 #                ipsc.genes$Gen_ID,  "Pluripotency Genes",

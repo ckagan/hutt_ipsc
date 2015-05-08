@@ -1,0 +1,6 @@
+ck.chosen = read.table('PC13_eQTLResults.Corrected.bed', header=T)
+gwasResults = cbind(ck.chosen$Variant, ck.chosen$Chr19, ck.chosen$Start19, ck.chosen$FDR)
+colnames(gwasResults) = c("SNP", "CHR", "BP", "P")
+res= as.data.frame(gwasResults)
+manhattan(res, suggestiveline = -log(0.05), genomewideline = F)
+-log(0.05)
