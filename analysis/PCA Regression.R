@@ -109,3 +109,14 @@ rownames(pcaresults.heatmap.batch.pl.mb) = c("batch", "sex","age","pluri","novel
 heatmap.2(pcaresults.heatmap.batch.pl.mb, col=myCol, breaks=myBreaks, margins=c(5,7),trace="none",main="Matrigel Bottle Regressed", key=F, keysize=1.5,density.info="none",cexCol=0.7, cexRow = 0.8, Rowv = FALSE, Colv = FALSE, scale="none")
 legend("topleft", fill = myCol, cex=0.8,
        legend = c("<1e-5", "1e-5 to 0.01", "0.01 to 0.05", ">0.05"))
+
+
+# Create expression table for GEMMA ####
+expr_gene_new = t(batch.residual.pluri.mb)
+# Re-order by individual in excel
+
+write.table(expr_gene_new, 'GeneExpression_Normalized_PCReg_GEMMA.txt', sep='\t', row.names=T, quote=F)
+
+test = expr_gene[,order(row.names(samplenames))]
+
+write.table(batch.residual.pluri.mb, 'PCRegressedData.txt', quote=F, )
