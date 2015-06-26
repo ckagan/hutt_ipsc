@@ -1,0 +1,18 @@
+if float(liner[12]) < pmin:
+			pmin = float(liner[12])
+			snpmin = liner[1]
+			beta = float(liner[7])
+			se = float(liner[8])
+
+if pmin == 1.1:
+		continue
+	#print "Starting up permutations..."
+	if bonferroni:
+		genep = min(1,pmin*currcount)
+	else:
+		genep = permer(gene)
+	winnerdic[gene] = [snpmin, pmin, genep, beta, se]
+	#completedgenes += 1
+
+
+print >> winners, '{0}\t{1[0]}\t{1[1]:.4g}\t{1[2]:.4g}\t{1[3]:.4g}\t{1[4]:.4g}'.format(gene,winnerdic[gene])

@@ -112,11 +112,6 @@ legend("topleft", fill = myCol, cex=0.8,
 
 
 # Create expression table for GEMMA ####
-expr_gene_new = t(batch.residual.pluri.mb)
-# Re-order by individual in excel
 
-write.table(expr_gene_new, 'GeneExpression_Normalized_PCReg_GEMMA.txt', sep='\t', row.names=T, quote=F)
+write.table(batch.residual.pluri.mb, 'GeneExpression_Normalized_PCReg_GEMMA.txt', sep='\t', row.names=T, quote=F)
 
-test = expr_gene[,order(row.names(samplenames))]
-
-write.table(batch.residual.pluri.mb, 'PCRegressedData.txt', quote=F, )
