@@ -1,0 +1,8 @@
+##Create eQTL file
+
+master=do.call(/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenesNoPCs/eQTLs/master.PC13.imputed.1Mb.bonferroni.regressPCs.gemma.chosen.txt, header = FALSE))
+  print(dim(master))
+  qs = p.adjust(master$V4,method="BH")
+  all = cbind(master,qs)
+eqtls = all[all$qs<.05,]
+write.table(eqtls, '

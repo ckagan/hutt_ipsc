@@ -19,6 +19,9 @@ colnames(ipsc2) = c("Gen_ID")
 pluri = read.table('Plurigenes.txt', header=T)
 
 ipsc.genes = read.table('ENSGList.allgenes.Ordered.txt')
+ipsc.genes.tested = read.table('iPSCGenesTested.txt')
+LCL.genes.tested = read.table('LCLGenesTested.txt')
+LCL.genes = read.table('LCLExpressedGenes.txt')
 colnames(ipsc.genes) = c("Gen_ID")
 
 all=c()
@@ -134,3 +137,94 @@ for (k in 1:12){
 for(i in 1:12){
 print(sum(perm.output[i,] > table[i,3]))
 }
+
+
+ipsc = read.table('iPSC.PC13.gemma.chosen.txt', header=F)
+LCL = read.table('LCL.PC8.gemma.chosen.txt', header=F)
+
+##Take only 5% BH filtered eQTLs from the Bonf corrected
+ipsc.qs = p.adjust(ipsc$V4,method="BH")
+ipsc.cor = cbind(ipsc,ipsc.qs)
+ipsc.eqtls = ipsc.cor[ipsc.cor$ipsc.qs <.05,]
+
+LCL.qs = p.adjust(LCL$V4,method="BH")
+LCL.cor = cbind(LCL,LCL.qs)
+LCL.eqtls = LCL.cor[LCL.cor$LCL.qs <.05,]
+
+##Find the shared eQTLs and those only for each cell type
+shared = which(ipsc.eqtls$V1 %in% LCL.eqtls$V1)
+shared.eqtls = ipsc.eqtls[shared,]
+#23 genes with shared eQTLs
+
+ipsc.only.eqtls = ipsc.eqtls[-shared,]
+#1005 iPSC specific
+shared.2 = which(LCL.eqtls$V1 %in% ipsc.eqtls$V1)
+LCL.only.eqtls = LCL.eqtls[-shared.2,]
+#128 LCL specific
+
+tested.both = which(ipsc.only.eqtls$V1 %in% LCL.genes.tested$V1)
+ipsc.only.tested.eqtls = ipsc.only.eqtls[tested.both,]
+#920 iPSC speific and tested in LCLs
+expr.both = which(ipsc.only.tested.eqtls$V1 %in% LCL.genes$V1)
+
+ipsc.only.tested.expressed.eqtls = ipsc.only.tested.eqtls[expr.both,]
+#920 eQTLs specific to iPSCs and expressed and tested in LCLs
+
+tested.both = which(LCL.only.eqtls$V1 %in% ipsc.genes.tested$V1)
+LCL.only.tested.eqtls = LCL.only.eqtls[tested.both,]
+#94 LCL speific and tested in iPSCs
+expr.both = which(LCL.only.tested.eqtls$V1 %in% ipsc.genes$V1)
+#61 LCL specific and expressed in iPSCs
+
+LCL.only.tested.expressed.eqtls = LCL.only.tested.eqtls[expr.both,]
+
+##P-value of overlap between LCL eQTLs and iPSC eQTLs
+perm.output= matrix(data=NA, nrow=100000, ncol=1)
+for(i in 1:100000) {
+  temp = sample(1:13483, 151, replace=F)
+  perm.data = as.data.frame(LCL[temp,])
+  test = ipsc.eqtls$V1 %in% perm.data$V1
+    tr = sum(test == T)
+    perm.output[i,1] = tr
+  }
+sum(perm.output[,1] > 22)
+#29 so pval is 0.00029
+
+##Do permutation for overall overlap
+#First subset only genes that were tested and expressed in both tissues
+tested.both = which(LCL$V1 %in% ipsc$V1)
+LCL.both = LCL[tested.both,]
+tested.both = which(ipsc$V1 %in% LCL$V1)
+ipsc.both = ipsc[tested.both,]
+#8,887 shared genes
+
+perm.both.output= matrix(data=NA, nrow=100000, ncol=1)
+for(i in 1:100000) {
+  temp = sample(1:8887, 84, replace=F)
+  perm.data = as.data.frame(LCL.both[temp,])
+  temp.i = sample(1:8887,943, replace=F)
+  perm.data.i= as.data.frame(ipsc.both[temp.i,])
+  test = perm.data.i$V1 %in% perm.data$V1
+  tr = sum(test == T)
+  perm.both.output[i,1] = tr
+}
+sum(perm.both.output[,1] > 22)
+#3 so pval 3e-05
+
+##Look for GTEx overlap
+gtex = read.table('GTExList.txt', header=F)
+ipsc.eqtls.f = ipsc.only.tested.expressed.eqtls
+
+colnames(ipsc.eqtls.f) = c("ENSG", "Variant", "p", "Bonf", "Qval")
+colnames(gtex)= c("Gene", "SNP")
+ipsc.gtex = merge(ipsc.eqtls.f, gtex, by.x = c("ENSG", "Variant"), by.y = c("Gene", "SNP"))
+#7 iPSC eQTLs overlap with GTEx list
+
+LCL.eqtls.f = LCL.only.tested.expressed.eqtls
+colnames(LCL.eqtls.f) = c("ENSG", "Variant", "p", "Bonf", "Qval")
+LCL.gtex = merge(LCL.eqtls.f, gtex, by.x = c("ENSG", "Variant"), by.y = c("Gene", "SNP"))
+#0 LCL eQTLs overlap with GTEx list
+
+colnames(shared.eqtls) = c("ENSG", "Variant", "p", "Bonf", "Qval")
+shared.gtex = merge(shared.eqtls, gtex, by.x = c("ENSG", "Variant"), by.y = c("Gene", "SNP"))
+#0 shared eQTLs overlap with GTEx list

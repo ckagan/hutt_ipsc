@@ -98,6 +98,12 @@ detect.gene<- which(detected > 7)
 norm_quant.all <- data.norm.all@assayData$exprs
 ###Find the column that is lumi_ID in feature data usually this column
 head(data.norm.all@featureData[[5]])
+allcleanprobes = data.norm.all@featureData[[5]]
+ipscprobes = as.matrix(allcleanprobes)
+colnames(ipscprobes)= c("probe")
+genestested = goodprobes[(as.character(goodprobes[,4])) %in% ipscprobes[,1],]
+ipscENSG = unique(genestested$targetENSG)
+write.table(ipscENSG, 'iPSCGenesTested.txt', quote=F, sep='\t', row.names=F, col.names=F)
 ##[1] "ILMN_1343291" "ILMN_1343295" "ILMN_1651199" "ILMN_1651209" "ILMN_1651210" "ILMN_1651221"
 ###Convert expr_quant rownames to
 rownames(norm_quant.all)=data.norm.all@featureData[[5]]
