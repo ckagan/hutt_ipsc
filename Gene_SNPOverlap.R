@@ -203,17 +203,17 @@ overlap.indiv = match(ck,colnames(expr_gene))
 overlap.exprs = match(nosex$V4, rownames(expr_gene))
 exprs.ordered = expr_gene[overlap.exprs,overlap.indiv]
 exprs.o.t = t(exprs.ordered)
-write.table(exprs.o.t,"Expr.allgenes.ordered.bimbam",row.names=F,col.names=F,quote=F,sep="\t")
+write.table(exprs.o.t,"Expr.allgenes.ordered.noPCs.bimbam",row.names=F,col.names=F,quote=F,sep="\t")
 
 ## Create PCA file based on re-ordered expression with all expressed genes
-exprs = read.table("Expr.allgenes.ordered.bimbam",header=F,sep="\t")
+exprs = read.table("Expr.allgenes.ordered.noPCs.bimbam",header=F,sep="\t")
 htpca = prcomp(exprs,scale.=TRUE)
 xhtpca = htpca$x
 pca_results = summary(htpca)
 pca_table = pca_results$importance
-write.table(pca_table,"PC_importance_HuttiPSCs_allgenes.txt",col.names=T,row.names=T,quote=F,sep="\t")
-write.table(xhtpca,"hutt.allgenes.ordered.pcs",col.names=F,row.names=F,quote=F,sep="\t")
-write.table(nosex$V4,"ENSGList.allgenes.Ordered.txt",row.names=F,col.names=F,quote=F,sep="\t")
+write.table(pca_table,"PC_importance_HuttiPSCs_allgenes.noPCs.txt",col.names=T,row.names=T,quote=F,sep="\t")
+write.table(xhtpca,"hutt.allgenes.ordered.noPCs.pcs",col.names=F,row.names=F,quote=F,sep="\t")
+write.table(nosex$V4,"ENSGList.allgenes.Ordered.noPCs.txt",row.names=F,col.names=F,quote=F,sep="\t")
 
 for (i in 1:22) {
   subset = nosex[nosex$V1 == paste("chr", i, sep=""),]
@@ -244,4 +244,67 @@ draw.quad.venn(11237,13965, 9202, c("iPSC 11,237 genes", "LCLs 13,965 genes"),co
 
 matcherfindiv = match(orderlist,rawmat$Ind2)
 rawmat$Ind2[14]
-orderlist[3]
+orderlist
+
+## Prep iPSC data with PC regression for GEMMA###
+##Create files for iPSC all genes
+expr_gene = read.table('GeneExpression_Normalized_PCReg_GEMMA.txt', header=T, as.is=T, sep='\t', row.names=1)
+exprnames = as.matrix(row.names(expr_gene))
+gene.bed.ordered= read.table('ensemblCAGETSS_ipsc_sorted.bed', header=F, sep='\t')
+nosex = gene.bed.ordered[1:10250,]
+
+samplenames = read.table('Covars.txt', header=T, sep ='\t')
+##Re-order samplenames based on array location
+samplenames = samplenames[order(samplenames$Order),]
+hearts = c(56:60,67:72)
+samplenames = samplenames[-hearts,]
+
+colnames(expr_gene)= samplenames$Findiv
+ck = read.table("hutt.imputed.73subset.fam")[,2]
+overlap.indiv = match(ck,colnames(expr_gene))
+overlap.exprs = match(nosex$V4, rownames(expr_gene))
+exprs.ordered = expr_gene[overlap.exprs,overlap.indiv]
+exprs.o.t = t(exprs.ordered)
+write.table(exprs.o.t,"Expr.allgenes.ordered.bimbam",row.names=F,col.names=F,quote=F,sep="\t")
+
+## Create PCA file based on re-ordered expression with all expressed genes
+exprs = read.table("Expr.allgenes.ordered.bimbam",header=F,sep="\t")
+htpca = prcomp(exprs,scale.=TRUE)
+xhtpca = htpca$x
+pca_results = summary(htpca)
+pca_table = pca_results$importance
+write.table(pca_table,"PC_importance_HuttiPSCs_allgenes.txt",col.names=T,row.names=T,quote=F,sep="\t")
+write.table(xhtpca,"hutt.allgenes.ordered.pcs",col.names=F,row.names=F,quote=F,sep="\t")
+write.table(nosex$V4,"ENSGList.allgenes.Ordered.txt",row.names=F,col.names=F,quote=F,sep="\t")
+
+
+##Create files with batch reg only
+expr_gene = read.table('GeneExpression_Normalized_BatchReg_GEMMA.txt', header=T, as.is=T, sep='\t', row.names=1)
+exprnames = as.matrix(row.names(expr_gene))
+gene.bed.ordered= read.table('ensemblCAGETSS_ipsc_sorted.bed', header=F, sep='\t')
+nosex = gene.bed.ordered[1:10250,]
+
+samplenames = read.table('Covars.txt', header=T, sep ='\t')
+##Re-order samplenames based on array location
+samplenames = samplenames[order(samplenames$Order),]
+hearts = c(56:60,67:72)
+samplenames = samplenames[-hearts,]
+
+colnames(expr_gene)= samplenames$Findiv
+ck = read.table("hutt.imputed.73subset.fam")[,2]
+overlap.indiv = match(ck,colnames(expr_gene))
+overlap.exprs = match(nosex$V4, rownames(expr_gene))
+exprs.ordered = expr_gene[overlap.exprs,overlap.indiv]
+exprs.o.t = t(exprs.ordered)
+write.table(exprs.o.t,"Expr.allgenes.ordered.batchreg.bimbam",row.names=F,col.names=F,quote=F,sep="\t")
+
+## Create PCA file based on re-ordered expression with all expressed genes
+exprs = read.table("Expr.allgenes.ordered.batchreg.bimbam",header=F,sep="\t")
+htpca = prcomp(exprs,scale.=TRUE)
+xhtpca = htpca$x
+pca_results = summary(htpca)
+pca_table = pca_results$importance
+#write.table(pca_table,"PC_importance_HuttiPSCs_allgenes.txt",col.names=T,row.names=T,quote=F,sep="\t")
+write.table(xhtpca,"hutt.allgenes.ordered.batchreg.pcs",col.names=F,row.names=F,quote=F,sep="\t")
+#write.table(nosex$V4,"ENSGList.allgenes.Ordered.txt",row.names=F,col.names=F,quote=F,sep="\t")
+
