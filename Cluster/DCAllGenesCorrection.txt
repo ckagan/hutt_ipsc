@@ -3,7 +3,7 @@ library(stringr)
 
 ##Tocheck that all chrs are completed
 #Get PC names
-all.pvals <- list.files(path = "/mnt/gluster/data/internal_supp/hutt_ipsc/DCAllGenes/output/",pattern=".imputed.1Mb.bonferroni.gccor.newcovcor.regressPCs.gemma.chosen.txt",full.names=T)
+all.pvals <- list.files(path = "/mnt/gluster/data/internal_supp/hutt_ipsc/DCAllGenes/output/",pattern=".imputed.1Mb.bonferroni.regressPCs.gemma.chosen.txt",full.names=T)
 pval.pcs.names = str_split(all.pvals,"[.]")
 pval.pcs = c()
 for(i in 1:length(pval.pcs.names)){
@@ -16,7 +16,7 @@ print(pcs)
 qcounts = c()
 for(i in 1:length(pcs)){
   j = as.character(pcs[i])
-  PC.pvals <- list.files(path = "/mnt/gluster/data/internal_supp/hutt_ipsc/DCAllGenes/output/",pattern = paste("PC", j, ".imputed.1Mb.bonferroni.gccor.newcovcor.regressPCs.gemma.chosen.txt", sep=""),full.names=T)
+  PC.pvals <- list.files(path = "/mnt/gluster/data/internal_supp/hutt_ipsc/DCAllGenes/output/",pattern = paste("PC", j, ".imputed.1Mb.bonferroni.regressPCs.gemma.chosen.txt", sep=""),full.names=T)
   #For each PC combine all chrs
   master=do.call("rbind", lapply(PC.pvals, read.table, header = FALSE))
   print(paste("PC",j,dim(master)))
@@ -26,7 +26,7 @@ for(i in 1:length(pcs)){
 qcounts[i]=qcount
 rm(master)
   }
-print(qcounts)
-pdf("/mnt/gluster/data/internal_supp/hutt_ipsc/Genotypes/ByChr/eQTLs.DCcorrection.pdf")
-plot(pcs,qcounts,xlab="Number of PCs Removed",ylab="No. of eQTLs",type="b",pch=20)
-dev.off()
+#print(qcounts)
+#pdf("/mnt/gluster/data/internal_supp/hutt_ipsc/Genotypes/ByChr/eQTLs.DCcorrection.pdf")
+#plot(pcs,qcounts,xlab="Number of PCs Removed",ylab="No. of eQTLs",type="b",pch=20)
+#dev.off()

@@ -1,0 +1,23 @@
+library(plyr)
+library(stringr)
+
+
+#Get PC names
+all.eqtls <- list.files(path = "/mnt/lustre/home/clk",pattern=".portal.eqtl",full.names=T)
+eqtl.names = str_split(all.eqtls,"[/]")
+eqtls = c()
+for(i in 1:length(eqtl.names)){
+  eqtls[i] = eqtl.names[[i]][6]
+}
+print(eqtls)
+##Analysis for loop
+effectsize = c()
+for(i in 1:length(eqtls)){
+  j = as.character(eqtls[i])
+  eqtl.pvals <- list.files(path = "/mnt/lustre/home/clk",pattern = j,full.names=T)
+  master= read.table(eqtl.pvals, header=T, as.is=T)
+  print(paste(j,mean(abs(master$Beta))))
+  effectsized = mean(abs(master$Beta))
+effectsize[i] = effectsized
+rm(master)
+  }

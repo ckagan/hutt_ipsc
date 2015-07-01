@@ -1,0 +1,39 @@
+##Generate eQTL only file from all three sets
+##Pull out SNP list from each of the three sets
+
+##For iPSCs
+master = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenesNoPCs/eQTLs/master.PC13.imputed.1Mb.bonferroni.regressPCs.gemma.chosen.txt', as.is=T)
+qs = p.adjust(master$V4,method="BH")
+all = cbind(master,qs)  
+eqtl = all[all$qs < 0.05,]
+sum(all$qs < 0.05)
+dim(eqtl)
+colnames(eqtl) = c("Gene", "SNP", "Raw Pval", "Bonf Pval", "Beta", "SE", "Bonf_BH Pval")
+eqtl.s = eqtl[order(eqtl[,7]),]
+write.table(eqtl.s, '/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenesNoPCs/eQTLs/master.PC13.eqtls.txt', quote=F, sep='\t', row.names=F)
+write.table(eqtl.s[,2], '/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenesNoPCs/eQTLs/master.PC13.eqtls.SNPs.txt', quote=F, sep='\t', row.names=F, col.names=F)
+
+##For all LCLs
+master= read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/DCFull/eQTLs/master.PC62.imputed.1Mb.bonferroni.gccor.newcovcor.regressPCs.gemma.chosen.txt', as.is=T)
+qs = p.adjust(master$V4,method="BH")
+all = cbind(master,qs)  
+eqtl = all[all$qs < 0.05,]
+sum(all$qs < 0.05)
+dim(eqtl)
+colnames(eqtl) = c("Gene", "SNP", "Raw Pval", "Bonf Pval", "Beta", "SE", "Bonf_BH Pval")
+eqtl.s = eqtl[order(eqtl[,7]),]
+write.table(eqtl.s, '/mnt/gluster/data/internal_supp/hutt_ipsc/DCFull/eQTLs/master.PC62.eqtls.txt', quote=F, sep='\t', row.names=F)
+write.table(eqtl.s[,2], '/mnt/gluster/data/internal_supp/hutt_ipsc/DCFull/eQTLs/master.PC62.eqtls.SNPs.txt', quote=F, sep='\t', row.names=F, col.names=F)
+
+
+##For a subset of LCLs
+master = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/DCAllGenes/eQTLs/master.PC8.imputed.1Mb.bonferroni.regressPCs.gemma.chosen.txt', as.is=T)
+qs = p.adjust(master$V4,method="BH")
+all = cbind(master,qs)  
+eqtl = all[all$qs < 0.05,]
+sum(all$qs < 0.05)
+dim(eqtl)
+colnames(eqtl) = c("Gene", "SNP", "Raw Pval", "Bonf Pval", "Beta", "SE", "Bonf_BH Pval")
+eqtl.s = eqtl[order(eqtl[,7]),]
+write.table(eqtl.s, '/mnt/gluster/data/internal_supp/hutt_ipsc/DCAllGenes/eQTLs/master.PC8.eqtls.txt', quote=F, sep='\t', row.names=F)
+write.table(eqtl.s[,2], '/mnt/gluster/data/internal_supp/hutt_ipsc/DCAllGenes/eQTLs/master.PC8.eqtls.SNPs.txt', quote=F, sep='\t', row.names=F, col.names=F)

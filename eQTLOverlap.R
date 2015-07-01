@@ -138,9 +138,15 @@ for(i in 1:12){
 print(sum(perm.output[i,] > table[i,3]))
 }
 
-
+setwd("C:/Users/Courtney/Dropbox/LCL-iPSC/GEMMA eQTLs/GEMMATest/Enrichment")
 ipsc = read.table('iPSC.PC13.gemma.chosen.txt', header=F)
 LCL = read.table('LCL.PC8.gemma.chosen.txt', header=F)
+ipsc.genes = read.table('ENSGList.allgenes.Ordered.txt')
+ipsc.genes.tested = read.table('iPSCGenesTested.txt')
+LCL.genes.tested = read.table('LCLGenesTested.txt')
+LCL.genes = read.table('LCLExpressedGenes.txt')
+colnames(ipsc.genes) = c("Gen_ID")
+
 
 ##Take only 5% BH filtered eQTLs from the Bonf corrected
 ipsc.qs = p.adjust(ipsc$V4,method="BH")
@@ -155,6 +161,11 @@ LCL.eqtls = LCL.cor[LCL.cor$LCL.qs <.05,]
 shared = which(ipsc.eqtls$V1 %in% LCL.eqtls$V1)
 shared.eqtls = ipsc.eqtls[shared,]
 #23 genes with shared eQTLs
+
+shared.LCL = which(LCL.eqtls$V1 %in% ipsc.eqtls$V1)
+shared.eqtls.LCL = LCL.eqtls[shared.LCL,]
+
+shared.both = merge(shared.eqtls, shared.eqtls.LCL, by.x = c("V1"), by.y = c("V1"))
 
 ipsc.only.eqtls = ipsc.eqtls[-shared,]
 #1005 iPSC specific
@@ -202,29 +213,304 @@ perm.both.output= matrix(data=NA, nrow=100000, ncol=1)
 for(i in 1:100000) {
   temp = sample(1:8887, 84, replace=F)
   perm.data = as.data.frame(LCL.both[temp,])
-  temp.i = sample(1:8887,943, replace=F)
+  temp.i = sample(1:8887,920, replace=F)
   perm.data.i= as.data.frame(ipsc.both[temp.i,])
   test = perm.data.i$V1 %in% perm.data$V1
   tr = sum(test == T)
   perm.both.output[i,1] = tr
 }
 sum(perm.both.output[,1] > 22)
-#3 so pval 3e-05
+#1 so pval 1e-05
 
 ##Look for GTEx overlap
 gtex = read.table('GTExList.txt', header=F)
+esQTL = read.table('esQTL_Battle.txt', header=T)
+b.eQTL = read.table('eQTL_Battle.txt', header=T)
 ipsc.eqtls.f = ipsc.only.tested.expressed.eqtls
 
-colnames(ipsc.eqtls.f) = c("ENSG", "Variant", "p", "Bonf", "Qval")
+colnames(ipsc.eqtls.f) = c("ENSG", "Variant", "p", "Bonf", "Beta", "Se","Qval")
 colnames(gtex)= c("Gene", "SNP")
+colnames(esQTL) = c("Gene", "chr",	"perm.p.values",	"snp.pvalue",	"hg18.pos")
+colnames(b.eQTL) = c("Gene", "chr",  "perm.p.values",	"snp.pvalue",	"snp.R.value", "hg18.pos")
 ipsc.gtex = merge(ipsc.eqtls.f, gtex, by.x = c("ENSG", "Variant"), by.y = c("Gene", "SNP"))
+ipsc.esQTL = merge(ipsc.eqtls.f, esQTL, by.x = c("ENSG"), by.y = c("Gene"))
+ipsc.b.eQTL = merge(ipsc.eqtls.f, b.eQTL, by.x = c("ENSG"), by.y = c("Gene"))
 #7 iPSC eQTLs overlap with GTEx list
 
 LCL.eqtls.f = LCL.only.tested.expressed.eqtls
-colnames(LCL.eqtls.f) = c("ENSG", "Variant", "p", "Bonf", "Qval")
+colnames(LCL.eqtls.f) = c("ENSG", "Variant", "p", "Bonf", "Beta", "Se","Qval")
+LCL.esQTL = merge(LCL.eqtls.f, esQTL, by.x = c("ENSG"), by.y = c("Gene"))
+LCL.b.eQTL = merge(LCL.eqtls.f, b.eQTL, by.x = c("ENSG"), by.y = c("Gene"))
 LCL.gtex = merge(LCL.eqtls.f, gtex, by.x = c("ENSG", "Variant"), by.y = c("Gene", "SNP"))
 #0 LCL eQTLs overlap with GTEx list
 
-colnames(shared.eqtls) = c("ENSG", "Variant", "p", "Bonf", "Qval")
+colnames(shared.eqtls) = c("ENSG", "Variant", "p", "Bonf", "Beta", "Se","Qval")
 shared.gtex = merge(shared.eqtls, gtex, by.x = c("ENSG", "Variant"), by.y = c("Gene", "SNP"))
+shared.esQTL = merge(shared.eqtls, esQTL, by.x = c("ENSG"), by.y = c("Gene"))
 #0 shared eQTLs overlap with GTEx list
+
+##Permute esQTL overlap
+perm.esQTL.LCL= matrix(data=NA, nrow=100000, ncol=1)
+for(i in 1:100000) {
+  temp = sample(1:8887, 61, replace=F)
+  perm.data.L = as.data.frame(LCL.both[temp,])
+  test = perm.data.L$V1 %in% esQTL$Gene
+  tr = sum(test == T)
+  perm.esQTL.LCL[i,1] = tr
+}
+sum(perm.esQTL.LCL[,1] > 2)
+
+perm.esQTL.ipsc= matrix(data=NA, nrow=100000, ncol=1)
+for(i in 1:100000) {
+  temp = sample(1:8887, 920, replace=F)
+  perm.data.i = as.data.frame(ipsc.both[temp,])
+  test = perm.data.i$V1 %in% esQTL$Gene
+  tr = sum(test == T)
+  perm.esQTL.ipsc[i,1] = tr
+}
+sum(perm.esQTL.ipsc[,1] > 32)
+
+
+write.table(ipsc.gtex, 'GTEx_iPSCeQTLOverlap.txt', quote=F, row.names=F, sep ='\t')
+
+##Look at Beta and SE of eQTLs
+mean(abs(ipsc.eqtls$V5))
+mean(abs(LCL.eqtls$V5))
+
+mean(ipsc.eqtls$V6)
+mean(LCL.eqtls$V6)
+
+mean(abs(ipsc.eqtls$V5))/mean(ipsc.eqtls$V6)
+mean(abs(LCL.eqtls$V5))/mean(LCL.eqtls$V6)
+
+mean(abs(ipsc.only.tested.expressed.eqtls$V5))
+mean(abs(LCL.only.tested.expressed.eqtls$V5))
+
+mean(ipsc.only.tested.expressed.eqtls$V6)
+mean(LCL.only.tested.expressed.eqtls$V6)
+
+colnames(shared.both) = c("ENSG", "iVariant", "ip", "iBonf", "iBeta", "iSe","iQval", "LVariant", "Lp", "LBonf", "LBeta", "LSe","LQval")
+#write.table(shared.both, 'OverlappingeQTLs.txt', sep='\t', quote=F, row.names=F)
+
+#Create plot looking at effect size between iPSCs and LCLs
+pdf("B_SE_FullLCL.pdf")
+plot(density(abs(ipsc.eqtls$V5)), col = "Orange", main = "Distribution of Absolute Value of eQTL Effect Sizes Using LCL Subset", xlab = "Absolute Value of the Effect Size", lwd =2)
+lines(density(abs(LCL.eqtls$V5)), col = "Blue", lwd =2)
+cells = c("iPSCs", "LCLs")
+legend(1.25,8, cells, fill=c("orange", "blue"))
+abline(v=min(abs(LCL.eqtls$V5)))  
+
+
+plot(density(abs(ipsc.eqtls$V6)), col = "Orange", main = "Distribution of SE for eQTLs Using LCL Subset", xlab = "Standard Error", lwd =2)
+lines(density(abs(LCL.eqtls$V6)), col = "Blue", lwd =2)
+cells = c("iPSCs", "LCLs")
+legend(.165,57, cells, fill=c("orange", "blue"))
+dev.off()
+
+all=c()
+all = c(as.character(ipsc.both$V1))
+all = unique(all)
+univ <- data.frame(all)
+library(VennDiagram)
+names(univ) <- "probes"
+
+make.venn.dual <- function(geneset1, geneset2, geneset1.label, geneset2.label, univ){
+  univ$g1 <- univ$probes %in% geneset1
+  univ$g2 <- univ$probes %in% geneset2
+  venn.placeholder <- draw.pairwise.venn(length(geneset1),length(geneset2), dim(univ[univ$g1 == T & univ$g2 == T , ])[1], c(geneset1.label, geneset2.label), fill=c("goldenrod", "plum4"), alpha=c(0.5, 0.5),col=NA, euler.d=T)
+  complement.size <- dim(univ[univ$g1 == F & univ$g2 == F , ])[1]
+  grid.text(paste(complement.size, "genes not an eQTL in either", sep=""), x=0.2, y=0.08)
+}
+
+# Make venn
+dev.off()
+pdf('Venn_LCLsubset.pdf')
+make.venn.dual(as.character(ipsc.eqtls$V1), as.character(LCL.eqtls$V1),"iPSC","LCL" ,univ)
+dev.off()
+
+
+
+#############
+###Re-do everything with full LCL set
+setwd("C:/Users/Courtney/Dropbox/LCL-iPSC/GEMMA eQTLs/GEMMATest/Enrichment")
+ipsc = read.table('iPSC.PC13.gemma.chosen.txt', header=F)
+LCL = read.table('LCLall.PC62.gemma.chosen.txt', header=F)
+ipsc.genes = read.table('ENSGList.allgenes.Ordered.txt')
+ipsc.genes.tested = read.table('iPSCGenesTested.txt')
+LCL.genes.tested = read.table('LCLGenesTested.txt')
+LCL.genes = read.table('LCLExpressedGenes.txt')
+#colnames(ipsc.genes) = c("Gen_ID")
+
+
+##Take only 5% BH filtered eQTLs from the Bonf corrected
+ipsc.qs = p.adjust(ipsc$V4,method="BH")
+ipsc.cor = cbind(ipsc,ipsc.qs)
+ipsc.eqtls = ipsc.cor[ipsc.cor$ipsc.qs <.05,]
+
+LCL.qs = p.adjust(LCL$V4,method="BH")
+LCL.cor = cbind(LCL,LCL.qs)
+LCL.eqtls = LCL.cor[LCL.cor$LCL.qs <.05,]
+
+##Find the shared eQTLs and those only for each cell type
+shared = which(ipsc.eqtls$V1 %in% LCL.eqtls$V1)
+shared.eqtls = ipsc.eqtls[shared,]
+#277 genes with shared eQTLs
+
+shared.LCL = which(LCL.eqtls$V1 %in% ipsc.eqtls$V1)
+shared.eqtls.LCL = LCL.eqtls[shared.LCL,]
+
+shared.both = merge(shared.eqtls, shared.eqtls.LCL, by.x = c("V1"), by.y = c("V1"))
+
+ipsc.only.eqtls = ipsc.eqtls[-shared,]
+#751 iPSC specific
+shared.2 = which(LCL.eqtls$V1 %in% ipsc.eqtls$V1)
+LCL.only.eqtls = LCL.eqtls[-shared.2,]
+#2034 LCL specific
+
+tested.both = which(ipsc.only.eqtls$V1 %in% LCL.genes.tested$V1)
+ipsc.only.tested.eqtls = ipsc.only.eqtls[tested.both,]
+#666 iPSC speific and tested in LCLs
+expr.both = which(ipsc.only.tested.eqtls$V1 %in% LCL.genes$V1)
+
+ipsc.only.tested.expressed.eqtls = ipsc.only.tested.eqtls[expr.both,]
+#666 eQTLs specific to iPSCs and expressed and tested in LCLs
+
+tested.both = which(LCL.only.eqtls$V1 %in% ipsc.genes.tested$V1)
+LCL.only.tested.eqtls = LCL.only.eqtls[tested.both,]
+#1486 LCL speific and tested in iPSCs
+expr.both = which(LCL.only.tested.eqtls$V1 %in% ipsc.genes$V1)
+#1071 LCL specific and expressed in iPSCs
+
+LCL.only.tested.expressed.eqtls = LCL.only.tested.eqtls[expr.both,]
+
+##Do permutation for overall overlap
+#First subset only genes that were tested and expressed in both tissues
+tested.both = which(LCL$V1 %in% ipsc$V1)
+LCL.both = LCL[tested.both,]
+tested.both = which(ipsc$V1 %in% LCL$V1)
+ipsc.both = ipsc[tested.both,]
+#8,887 shared genes
+
+perm.both.output= matrix(data=NA, nrow=100000, ncol=1)
+for(i in 1:100000) {
+  temp = sample(1:8887, 1071, replace=F)
+  perm.data = as.data.frame(LCL.both[temp,])
+  temp.i = sample(1:8887,666, replace=F)
+  perm.data.i= as.data.frame(ipsc.both[temp.i,])
+  test = perm.data.i$V1 %in% perm.data$V1
+  tr = sum(test == T)
+  perm.both.output[i,1] = tr
+}
+sum(perm.both.output[,1] > 276)
+#0 so pval 1e-05
+
+##Look for GTEx overlap
+gtex = read.table('GTExList.txt', header=F)
+esQTL = read.table('esQTL_Battle.txt', header=T)
+b.eQTL = read.table('eQTL_Battle.txt', header=T)
+ipsc.eqtls.f = ipsc.only.tested.expressed.eqtls
+
+colnames(ipsc.eqtls.f) = c("ENSG", "Variant", "p", "Bonf", "Beta", "Se","Qval")
+colnames(gtex)= c("Gene", "SNP")
+colnames(esQTL) = c("Gene", "chr",  "perm.p.values",	"snp.pvalue",	"hg18.pos")
+colnames(b.eQTL) = c("Gene", "chr",  "perm.p.values",	"snp.pvalue",	"snp.R.value", "hg18.pos")
+ipsc.gtex = merge(ipsc.eqtls.f, gtex, by.x = c("ENSG", "Variant"), by.y = c("Gene", "SNP"))
+ipsc.esQTL = merge(ipsc.eqtls.f, esQTL, by.x = c("ENSG"), by.y = c("Gene"))
+ipsc.b.eQTL = merge(ipsc.eqtls.f, b.eQTL, by.x = c("ENSG"), by.y = c("Gene"))
+#4 iPSC eQTLs overlap with GTEx list
+
+LCL.eqtls.f = LCL.only.tested.expressed.eqtls
+colnames(LCL.eqtls.f) = c("ENSG", "Variant", "p", "Bonf", "Beta", "Se","Qval")
+LCL.esQTL = merge(LCL.eqtls.f, esQTL, by.x = c("ENSG"), by.y = c("Gene"))
+LCL.b.eQTL = merge(LCL.eqtls.f, b.eQTL, by.x = c("ENSG"), by.y = c("Gene"))
+LCL.gtex = merge(LCL.eqtls.f, gtex, by.x = c("ENSG", "Variant"), by.y = c("Gene", "SNP"))
+#10 LCL eQTLs overlap with GTEx list
+
+colnames(shared.eqtls) = c("ENSG", "Variant", "p", "Bonf", "Beta", "Se","Qval")
+shared.gtex = merge(shared.eqtls, gtex, by.x = c("ENSG", "Variant"), by.y = c("Gene", "SNP"))
+shared.esQTL = merge(shared.eqtls, esQTL, by.x = c("ENSG"), by.y = c("Gene"))
+#3 shared eQTLs overlap with GTEx list
+
+##Permute esQTL overlap
+perm.esQTL.LCL= matrix(data=NA, nrow=100000, ncol=1)
+for(i in 1:100000) {
+  temp = sample(1:8887, 1071, replace=F)
+  perm.data.L = as.data.frame(LCL.both[temp,])
+  test = perm.data.L$V1 %in% esQTL$Gene
+  tr = sum(test == T)
+  perm.esQTL.LCL[i,1] = tr
+}
+sum(perm.esQTL.LCL[,1] > 36)
+
+perm.esQTL.ipsc= matrix(data=NA, nrow=100000, ncol=1)
+for(i in 1:100000) {
+  temp = sample(1:8887, 666, replace=F)
+  perm.data.i = as.data.frame(ipsc.both[temp,])
+  test = perm.data.i$V1 %in% esQTL$Gene
+  tr = sum(test == T)
+  perm.esQTL.ipsc[i,1] = tr
+}
+sum(perm.esQTL.ipsc[,1] > 14)
+
+
+write.table(ipsc.gtex, 'GTEx_iPSCeQTLOverlap_FullLCL.txt', quote=F, row.names=F, sep ='\t')
+write.table(LCL.gtex, 'GTEx_LCLeQTLOverlap_FullLCL.txt', quote=F, row.names=F, sep ='\t')
+write.table(shared.gtex, 'GTEx_SharedeQTLOverlap_FullLCL.txt', quote=F, row.names=F, sep ='\t')
+
+##Look at Beta and SE of eQTLs
+mean(abs(ipsc.eqtls$V5))
+mean(abs(LCL.eqtls$V5))
+min(abs(ipsc.eqtls$V5))
+min(abs(LCL.eqtls$V5))
+length(ipsc.eqtls$V5[abs(ipsc.eqtls$V5) <= min(abs(LCL.eqtls$V5))])
+
+mean(ipsc.eqtls$V6)
+mean(LCL.eqtls$V6)
+
+mean(abs(ipsc.eqtls$V5))/mean(ipsc.eqtls$V6)
+mean(abs(LCL.eqtls$V5))/mean(LCL.eqtls$V6)
+
+mean(abs(ipsc.only.tested.expressed.eqtls$V5))
+mean(abs(LCL.only.tested.expressed.eqtls$V5))
+
+mean(ipsc.only.tested.expressed.eqtls$V6)
+mean(LCL.only.tested.expressed.eqtls$V6)
+
+colnames(shared.both) = c("ENSG", "iVariant", "ip", "iBonf", "iBeta", "iSe","iQval", "LVariant", "Lp", "LBonf", "LBeta", "LSe","LQval")
+write.table(shared.both, 'OverlappingeQTLs_FullLCL.txt', sep='\t', quote=F, row.names=F)
+
+#Create plot looking at effect size between iPSCs and LCLs
+pdf("B_SE_FullLCL.pdf")
+plot(density(abs(ipsc.eqtls$V5)), col = "Orange", main = "Distribution of Absolute Value of eQTL Effect Sizes Using Full LCL Set", xlab = "Absolute Value of the Effect Size", lwd =2)
+lines(density(abs(LCL.eqtls$V5)), col = "Blue", lwd =2)
+cells = c("iPSCs", "LCLs")
+legend(1.25,8, cells, fill=c("orange", "blue"))
+abline(v=min(abs(LCL.eqtls$V5)))  
+
+
+plot(density(abs(ipsc.eqtls$V6)), col = "Orange", main = "Distribution of SE for eQTLs Using Full LCL Set", xlab = "Standard Error", lwd =2)
+lines(density(abs(LCL.eqtls$V6)), col = "Blue", lwd =2)
+cells = c("iPSCs", "LCLs")
+legend(.165,57, cells, fill=c("orange", "blue"))
+dev.off()
+
+all=c()
+all = c(as.character(ipsc.both$V1))
+all = unique(all)
+univ <- data.frame(all)
+library(VennDiagram)
+names(univ) <- "probes"
+
+make.venn.dual <- function(geneset1, geneset2, geneset1.label, geneset2.label, univ){
+  univ$g1 <- univ$probes %in% geneset1
+  univ$g2 <- univ$probes %in% geneset2
+  venn.placeholder <- draw.pairwise.venn(length(geneset1),length(geneset2), dim(univ[univ$g1 == T & univ$g2 == T , ])[1], c(geneset1.label, geneset2.label), fill=c("goldenrod", "plum4"), alpha=c(0.5, 0.5),col=NA, euler.d=T)
+  complement.size <- dim(univ[univ$g1 == F & univ$g2 == F , ])[1]
+  grid.text(paste(complement.size, "genes not an eQTL in either", sep=""), x=0.2, y=0.08)
+}
+
+# Make venn
+dev.off()
+pdf('Venn_FullLCL.pdf')
+make.venn.dual(as.character(ipsc.eqtls$V1), as.character(LCL.eqtls$V1),"iPSC","LCL" ,univ)
+dev.off()
