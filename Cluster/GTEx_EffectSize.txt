@@ -1,7 +1,6 @@
 library(plyr)
 library(stringr)
 
-
 #Get PC names
 all.eqtls <- list.files(path = "/mnt/lustre/home/clk",pattern=".portal.eqtl",full.names=T)
 eqtl.names = str_split(all.eqtls,"[/]")
@@ -19,5 +18,25 @@ for(i in 1:length(eqtls)){
   print(paste(j,mean(abs(master$Beta))))
   effectsized = mean(abs(master$Beta))
 effectsize[i] = effectsized
+test = abs(master$Beta)
+assign(j,test)
 rm(master)
   }
+eqtls[16] = "LCLFullSet"
+eqtls[15] = "LCLSubset"
+eqtls[17] = "iPSC"
+LCL.f = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/DCFull/eQTLs/master.PC62.eqtls.txt', as.is=T, skip=1)
+LCLFullSet = abs(LCL.f$V5)
+
+LCL.s = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/DCAllGenes/eQTLs/master.PC8.eqtls.txt', as.is=T, skip=1)
+LCLSubset = abs(LCL.s$V5)
+
+ipsc = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenesNoPCs/eQTLs/master.PC13.eqtls.txt', as.is=T, skip=1)
+iPSC = abs(ipsc$V5)
+
+dataList <- lapply(eqtls[-4], get, envir=environment())
+names(dataList) = eqtls[-4]
+pdf("EffectSize_GTEx.pdf")
+colors = c("green", "green","green", "green","green", "green","green", "green","green", "green","green", "green","green", "gray","blue","purple")
+boxplot(dataList, col= colors)
+dev.off()

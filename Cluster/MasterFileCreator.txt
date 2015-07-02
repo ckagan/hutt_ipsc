@@ -1,0 +1,2 @@
+cat /mnt/gluster/data/internal_supp/hutt_ipsc/AllGenesNoPCs/output/*.PC13.imputed.1Mb.bonferroni.regressPCs.gemma.eqtls.txt | sort -k1,1 -k2,2 > /mnt/gluster/data/internal_supp/hutt_ipsc/AllGenesNoPCs/eQTLs/master.PC13.imputed.1Mb.bonferroni.regressPCs.gemma.eqtls.txt; cat /mnt/gluster/data/internal_supp/hutt_ipsc/AllGenesNoPCs/output/*.PC13.imputed.1Mb.bonferroni.regressPCs.gemma.chosen.txt | sort -k1,1 >  /mnt/gluster/data/internal_supp/hutt_ipsc/AllGenesNoPCs/eQTLs/master.PC13.imputed.1Mb.bonferroni.regressPCs.gemma.chosen.txt
+

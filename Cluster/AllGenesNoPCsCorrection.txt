@@ -27,9 +27,6 @@ qcounts[i] = qcount
 rm(master)
   }
 print(qcounts)
-pdf("/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenes/eQTLs/eQTLs.DCcorrection.pdf")
-plot(pcs,qcounts,xlab="No. of PCs Removed",ylab="No. of eQTLs",type="b",pch=20)
-dev.off()
-pdf("/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenes/eQTLs/eQTLs.DCcorrection.pdf")
+pdf("/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenesNoPCs/eQTLs/eQTLs.correction.pdf")
 plot(pcs,qcounts,xlab="No. of PCs Removed",ylab="No. of eQTLs",type="b",pch=20)
 dev.off()
