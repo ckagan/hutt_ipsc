@@ -40,3 +40,60 @@ pdf("EffectSize_GTEx.pdf")
 colors = c("green", "green","green", "green","green", "green","green", "green","green", "green","green", "green","green", "gray","blue","purple")
 boxplot(dataList, col= colors)
 dev.off()
+
+
+##SE
+for(i in 1:length(eqtls)){
+  j = as.character(eqtls[i])
+  eqtl.pvals <- list.files(path = "/mnt/lustre/home/clk",pattern = j,full.names=T)
+  master= read.table(eqtl.pvals, header=T, as.is=T)
+test = (master$Beta/master$T_Stat)
+assign(j,test)
+rm(master)
+  }
+eqtls[16] = "LCLFullSet"
+eqtls[15] = "LCLSubset"
+eqtls[17] = "iPSC"
+LCL.f = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/DCFull/eQTLs/master.PC62.eqtls.txt', as.is=T, skip=1)
+LCLFullSet = abs(LCL.f$V6)
+
+LCL.s = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/DCAllGenes/eQTLs/master.PC8.eqtls.txt', as.is=T, skip=1)
+LCLSubset = abs(LCL.s$V6)
+
+ipsc = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenesNoPCs/eQTLs/master.PC13.eqtls.txt', as.is=T, skip=1)
+iPSC = abs(ipsc$V6)
+
+dataList <- lapply(eqtls[-4], get, envir=environment())
+names(dataList) = eqtls[-4]
+pdf("SE_GTEx.pdf")
+colors = c("green", "green","green", "green","green", "green","green", "green","green", "green","green", "green","green", "gray","blue","purple")
+boxplot(dataList, col= colors)
+dev.off()
+
+##TStat
+for(i in 1:length(eqtls)){
+  j = as.character(eqtls[i])
+  eqtl.pvals <- list.files(path = "/mnt/lustre/home/clk",pattern = j,full.names=T)
+  master= read.table(eqtl.pvals, header=T, as.is=T)
+test = (abs(master$T_Stat))
+assign(j,test)
+rm(master)
+  }
+eqtls[16] = "LCLFullSet"
+eqtls[15] = "LCLSubset"
+eqtls[17] = "iPSC"
+LCL.f = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/DCFull/eQTLs/master.PC62.eqtls.txt', as.is=T, skip=1)
+LCLFullSet = abs(LCL.f$V5/LCL.f$V6)
+
+LCL.s = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/DCAllGenes/eQTLs/master.PC8.eqtls.txt', as.is=T, skip=1)
+LCLSubset = abs(LCL.s$V5/LCL.s$V6)
+
+ipsc = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenesNoPCs/eQTLs/master.PC13.eqtls.txt', as.is=T, skip=1)
+iPSC = abs(ipsc$V5/ipsc$V6)
+
+dataList <- lapply(eqtls[-4], get, envir=environment())
+names(dataList) = eqtls[-4]
+pdf("TStat_GTEx.pdf")
+colors = c("green", "green","green", "green","green", "green","green", "green","green", "green","green", "green","green", "gray","blue","purple")
+boxplot(dataList, col= colors)
+dev.off()
