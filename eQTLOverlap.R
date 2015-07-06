@@ -336,7 +336,7 @@ dev.off()
 
 #############
 ###Re-do everything with full LCL set
-setwd("C:/Users/Courtney/Dropbox/LCL-iPSC/GEMMA eQTLs/GEMMATest/Enrichment")
+setwd("C:/Users/Courtney/Dropbox/LCL-iPSC/GEMMA eQTLs/GEMMATest")
 ipsc = read.table('iPSC.PC13.gemma.chosen.txt', header=F)
 LCL = read.table('LCLall.PC62.gemma.chosen.txt', header=F)
 ipsc.genes = read.table('ENSGList.allgenes.Ordered.txt')
@@ -401,8 +401,8 @@ tested.both = which(ipsc$V1 %in% LCL$V1)
 ipsc.both = ipsc[tested.both,]
 #8,887 shared genes
 
-perm.both.output= matrix(data=NA, nrow=100000, ncol=1)
-for(i in 1:100000) {
+perm.both.output= matrix(data=NA, nrow=1000000, ncol=1)
+for(i in 1:1000000) {
   temp = sample(1:8887, 1071, replace=F)
   perm.data = as.data.frame(LCL.both[temp,])
   temp.i = sample(1:8887,666, replace=F)
@@ -412,7 +412,7 @@ for(i in 1:100000) {
   perm.both.output[i,1] = tr
 }
 sum(perm.both.output[,1] > 276)
-#0 so pval 1e-05
+#0 so pval 1e-06
 
 ##Look for GTEx overlap
 gtex = read.table('GTExList.txt', header=F)

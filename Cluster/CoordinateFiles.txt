@@ -1,0 +1,21 @@
+##iPSC
+location = read.table("/mnt/gluster/data/internal_supp/hutt_ipsc/Genotypes/hutt.imputed.73subset.created.bed") 
+colnames(location)= c("Chr", "Start", "Stop", "SNP")
+all = read.table("/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenesNoPCs/eQTLs/master.PC13.eqtls.SNPs.txt", header=F)
+colnames(all)= c("Variant")
+merged = merge(all, location, by.x = "Variant", by.y = "SNP", all.x=TRUE, all.y=FALSE)
+write.table(merged, '/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenesNoPCs/eQTLs/master.PC13.eqtls.coords.txt', sep='\t', quote=F, row.names=F)
+
+#LCL Full
+all = read.table("/mnt/gluster/data/internal_supp/hutt_ipsc/DCFull/eQTLs/master.PC62.eqtls.SNPs.txt", header=F)
+colnames(all)= c("Variant")
+merged = merge(all, location, by.x = "Variant", by.y = "SNP", all.x=TRUE, all.y=FALSE)
+write.table(merged, '/mnt/gluster/data/internal_supp/hutt_ipsc/DCFull/eQTLs/master.PC62.eqtls.coords.txt', sep='\t', quote=F, row.names=F, col.names=F)
+
+#LCL subset
+all = read.table("/mnt/gluster/data/internal_supp/hutt_ipsc/DCAllGenes/eQTLs/master.PC8.eqtls.SNPs.txt", header=F)
+colnames(all)= c("Variant")
+merged = merge(all, location, by.x = "Variant", by.y = "SNP", all.x=TRUE, all.y=FALSE)
+write.table(merged, '/mnt/gluster/data/internal_supp/hutt_ipsc/DCAllGenes/eQTLs/master.PC8.coords.SNPs.txt', sep='\t', quote=F, row.names=F, col.names=F)
+
+#In excel move variant to last column to make a bed file with hg19 coordinates

@@ -15,6 +15,14 @@ for(i in 1:length(eqtls)){
   j = as.character(eqtls[i])
   eqtl.pvals <- list.files(path = "/mnt/lustre/home/clk",pattern = j,full.names=T)
   master= read.table(eqtl.pvals, header=T, as.is=T)
+ENSG = str_split(master$Gen_ID,"[.]")
+	gene = matrix(data=NA, nrow = dim(master)[1], ncol =1)
+for (j in 1:dim(master)[1]){
+	gene[j,] = as.character(ENSG[[j]][1])
+}
+master = cbind(master, gene)
+##Filter out by possibel gene list
+##
   print(paste(j,mean(abs(master$Beta))))
   effectsized = mean(abs(master$Beta))
 effectsize[i] = effectsized
