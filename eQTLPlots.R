@@ -60,28 +60,28 @@ geno.l.t = t(geno.l)
 
 library(beeswarm)
 ##Create pdfs
-pdf("Opposite_Direction_eQTLs.pdf")
+pdf("Opposite_Direction_eQTLs.pdf", family="Garamond")
 eqtl.loc = as.matrix(exprs.o.t[,which(colnames(exprs.o.t) == "ENSG00000164048")])
 eqtl.geno = as.matrix(geno.i.t[which(rownames(geno.i.t) == "rs12495221_C"),])
-boxplot(eqtl.loc~eqtl.geno, main = "ZNF589 Expression in iPSCs")
+boxplot(eqtl.loc~eqtl.geno, main = "ZNF589 Expression in iPSCs",col=(c("orange", "lightgreen", "lightblue")))
 beeswarm(eqtl.loc~eqtl.geno, add=T, col="black", vertical=T,pch=20)
 
 
 eqtl.loc = as.matrix(dc.exprs[,which(colnames(dc.exprs) == "ENSG00000164048")])
 eqtl.geno = as.matrix(geno.l.t[which(rownames(geno.l.t) == "rs12495221_C"),])
-boxplot(eqtl.loc~eqtl.geno, main = "ZNF589 Expression in LCLs")
+boxplot(eqtl.loc~eqtl.geno, main = "ZNF589 Expression in LCLs",col=(c("orange", "lightgreen", "lightblue")))
 beeswarm(eqtl.loc~eqtl.geno, add=T, col= "black", vertical=T,pch=20)
 
 
 eqtl.loc = as.matrix(exprs.o.t[,which(colnames(exprs.o.t) == "ENSG00000146833")])
 eqtl.geno = as.matrix(geno.i.t[which(rownames(geno.i.t) == "rs2571997_A"),])
-boxplot(eqtl.loc~eqtl.geno, main = "TRIM4 Expression in iPSCs")
+boxplot(eqtl.loc~eqtl.geno, main = expression(paste(italic("TRIM4")," Expression in iPSCs")),col=(c("orange", "lightgreen", "lightblue")), xlab = "Genotype (Number of Minor Alleles)", ylab = "Gene Expression")#, xlim =c(0,7), at = 1:3*1, xaxt = "n", ylim = c(-1.5,1.5))
 beeswarm(eqtl.loc~eqtl.geno, add=T, col="black", vertical=T,pch=20)
 
 eqtl.loc = as.matrix(dc.exprs[,which(colnames(dc.exprs) == "ENSG00000146833")])
 eqtl.geno = as.matrix(geno.l.t[which(rownames(geno.l.t) == "rs2571997_A"),])
-boxplot(eqtl.loc~eqtl.geno, main = "TRIM4 Expression in LCLs")
-beeswarm(eqtl.loc~eqtl.geno, add=T, col= "black", vertical=T,pch=20)
+boxplot(eqtl.loc~eqtl.geno, main = expression(paste(italic("TRIM4")," Expression in LCLs")),col=(c("orange", "lightgreen", "lightblue")),xlab = "Genotype (Number of Minor Alleles)", ylab = "Gene Expression")#, add=T, at = 4:6*1, xaxt = "n")
+beeswarm(eqtl.loc~eqtl.geno, add=T, col= "black", vertical=T,pch=20) #, at = 4:6*1)
 dev.off()
 
 #Most significant iPSC eQTL ENSG00000011405  rs17560341
@@ -100,8 +100,8 @@ beeswarm(eqtl.loc~eqtl.geno, add=T, col="black", vertical=T,pch=20)
 
 boxplot(as.matrix(exprs.o.t[,which(colnames(exprs.o.t) == "ENSG00000181449")]), main = "SOX2 Expression")
 boxplot(as.matrix(exprs.o.t[,which(colnames(exprs.o.t) == "ENSG00000204531")]), main = "OCT3/4 Expression")
-boxplot(as.matrix(exprs.o.t[,which(colnames(exprs.o.t) == "ENSG00000215271")]), main = "HOMEZ Expression")
-boxplot(as.matrix(exprs.o.t[,which(colnames(exprs.o.t) == "ENSG00000187140")]), main = "FOXD3 Expression")
+boxplot(as.matrix(exprs.o.t[,which(colnames(exprs.o.t) == "ENSG00000215271")]), main = "HOMEZ Expression",xlim =c(0,1), at = .2:.2*1, xaxt = "n", ylim = c(-.25,.25))
+boxplot(as.matrix(exprs.o.t[,which(colnames(exprs.o.t) == "ENSG00000187140")]), add=T, at = .8:.8*1, xaxt = "n") #main = "FOXD3 Expression",
 var(as.matrix(exprs.o.t[,which(colnames(exprs.o.t) == "ENSG00000187140")]))
 var(as.matrix(exprs.o.t[,which(colnames(exprs.o.t) == "ENSG00000215271")]))
 

@@ -9,46 +9,93 @@ for(i in 1:length(eqtl.names)){
   eqtls[i] = eqtl.names[[i]][6]
 }
 print(eqtls)
+eqtls=eqtls[-4]
+igenes = read.table('/mnt/lustre/home/clk/iPSCGenesTested.txt', header=F, as.is=T)
+egenes = read.table('/mnt/lustre/home/clk/GTExSharedeQTL_ipsc.txt', header=F, as.is=T)
+count = c("a","b","c","d","e","f","g","h","i","j","k","l","m")
 ##Analysis for loop
-effectsize = c()
+effectsize = matrix(data=NA, nrow = 13, ncol=3)
 for(i in 1:length(eqtls)){
-  j = as.character(eqtls[i])
-  eqtl.pvals <- list.files(path = "/mnt/lustre/home/clk",pattern = j,full.names=T)
-  master= read.table(eqtl.pvals, header=T, as.is=T)
-ENSG = str_split(master$Gen_ID,"[.]")
+  	j = as.character(eqtls[i])
+	k = count[i]
+  	eqtl.pvals <- list.files(path = "/mnt/lustre/home/clk",pattern = j,full.names=T)
+  	master= read.table(eqtl.pvals, header=T, as.is=T)
+	ENSG = str_split(master$Gen_ID,"[.]")
 	gene = matrix(data=NA, nrow = dim(master)[1], ncol =1)
-for (j in 1:dim(master)[1]){
-	gene[j,] = as.character(ENSG[[j]][1])
-}
-master = cbind(master, gene)
-##Filter out by possibel gene list
-##
-  print(paste(j,mean(abs(master$Beta))))
-  effectsized = mean(abs(master$Beta))
-effectsize[i] = effectsized
-test = abs(master$Beta)
-assign(j,test)
-rm(master)
+		for (m in 1:dim(master)[1]){
+			gene[m,] = as.character(ENSG[[m]][1])
+		}
+	master = cbind(master, gene)
+	ordered = master[order(master$P_Val),]
+	uni = ordered[!duplicated(ordered$Gen_ID),]
+	##Filter out by possible iPSC gene list
+	sgenes = which(uni$gene %in% igenes$V1)
+	overlapgenesonly = uni[sgenes,]
+  	print(paste(j,mean(abs(uni$Beta))))
+  	print(paste(j,mean(abs(overlapgenesonly$Beta))))
+	segenes = which(overlapgenesonly$gene %in% egenes$V1)
+	overlapeqtls = overlapgenesonly[segenes,]
+	effectsize[i,1] = mean(abs(uni$Beta))
+	effectsize[i,2]= mean(abs(overlapgenesonly$Beta))
+	effectsize[i,3]= mean(abs(overlapeqtls$Beta))
+	print(paste(j,mean(abs(overlapeqtls$Beta))))
+	#test = abs(uni$Beta)
+	test = abs(overlapgenesonly$Beta)
+	test2 = abs(overlapeqtls$Beta)
+	assign(j,test)
+	assign(k, test2)
+	rm(master)
   }
-eqtls[16] = "LCLFullSet"
-eqtls[15] = "LCLSubset"
-eqtls[17] = "iPSC"
+rownames(effectsize)=eqtls
+colnames(effectsize) = c('All', 'iPSC_Tested_Only', 'iPSC_eQTLs_Only')
+#write.table(effectsize, '~/GTExEffectSizeiPSCOnly.txt', sep='\t', quote=F)
+eqtls[15] = "LCLFullSet"
+eqtls[14] = "LCLSubset"
+eqtls[16] = "iPSC"
+
+count[14]= "LCL.S.eqtls"
+count[15]= "LCL.F.eqtls"
+count[16]= "iPSC"
+
 LCL.f = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/DCFull/eQTLs/master.PC62.eqtls.txt', as.is=T, skip=1)
+sgenes = which(LCL.f$V1 %in% igenes$V1)
+LCL.f = LCL.f[sgenes,]
 LCLFullSet = abs(LCL.f$V5)
+segenes = which(LCL.f$V1 %in% egenes$V1)
+LCL.F= LCL.f[segenes,]
+LCL.F.eqtls = abs(LCL.F$V5) 
 
 LCL.s = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/DCAllGenes/eQTLs/master.PC8.eqtls.txt', as.is=T, skip=1)
+sgenes = which(LCL.s$V1 %in% igenes$V1)
+LCL.s = LCL.s[sgenes,]
 LCLSubset = abs(LCL.s$V5)
+segenes = which(LCL.s$V1 %in% egenes$V1)
+LCL.S= LCL.s[segenes,]
+LCL.S.eqtls = abs(LCL.S$V5)
 
 ipsc = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenesNoPCs/eQTLs/master.PC13.eqtls.txt', as.is=T, skip=1)
 iPSC = abs(ipsc$V5)
 
-dataList <- lapply(eqtls[-4], get, envir=environment())
-names(dataList) = eqtls[-4]
+dataList <- lapply(eqtls, get, envir=environment())
+names(dataList) = eqtls
+
+dataL <- lapply(count, get, envir=environment())
+names(dataL) = count
+
+library(ggplot2)
+ggplot(dataList, aes(x=cond, y=rating, fill=cond)) + geom_boxplot()
+
 pdf("EffectSize_GTEx.pdf")
-colors = c("green", "green","green", "green","green", "green","green", "green","green", "green","green", "green","green", "gray","blue","purple")
+colors = c("lightgreen", "lightgreen","lightgreen", "lightgreen","lightgreen", "lightgreen","lightgreen", "lightgreen","lightgreen", "lightgreen","lightgreen", "lightgreen","lightgreen", "lightblue","orange","grey")
 boxplot(dataList, col= colors)
+boxplot(dataL, col= colors)
 dev.off()
 
+#whole blood is only significant p-value = 0.01525
+plot(density(Whole_Blood.portal.eqtl), col = "Orange", main = "Distribution of effect size", xlab = "Absolute Value of the Effect Size", lwd =2, ylim =c(0,3))
+lines(density(m), col = "Blue", lwd =2)
+cells = c("Whole Blood eQTLs", "Whole Blood eQTLs \nin genes with iPSC eQTLs")
+legend(1,2, cells, fill=c("orange", "blue"))
 
 ##SE
 for(i in 1:length(eqtls)){
@@ -71,8 +118,8 @@ LCLSubset = abs(LCL.s$V6)
 ipsc = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenesNoPCs/eQTLs/master.PC13.eqtls.txt', as.is=T, skip=1)
 iPSC = abs(ipsc$V6)
 
-dataList <- lapply(eqtls[-4], get, envir=environment())
-names(dataList) = eqtls[-4]
+dataList <- lapply(eqtls, get, envir=environment())
+names(dataList) = eqtls
 pdf("SE_GTEx.pdf")
 colors = c("green", "green","green", "green","green", "green","green", "green","green", "green","green", "green","green", "gray","blue","purple")
 boxplot(dataList, col= colors)
@@ -99,8 +146,8 @@ LCLSubset = abs(LCL.s$V5/LCL.s$V6)
 ipsc = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenesNoPCs/eQTLs/master.PC13.eqtls.txt', as.is=T, skip=1)
 iPSC = abs(ipsc$V5/ipsc$V6)
 
-dataList <- lapply(eqtls[-4], get, envir=environment())
-names(dataList) = eqtls[-4]
+dataList <- lapply(eqtls, get, envir=environment())
+names(dataList) = eqtls
 pdf("TStat_GTEx.pdf")
 colors = c("green", "green","green", "green","green", "green","green", "green","green", "green","green", "green","green", "gray","blue","purple")
 boxplot(dataList, col= colors)

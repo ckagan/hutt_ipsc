@@ -141,7 +141,7 @@
 
 
 ##With LCL subset
-setwd("C:/Users/Courtney/Dropbox/LCL-iPSC/GEMMA eQTLs/GEMMATest/Enrichment")
+setwd("C:/Users/Courtney/Dropbox/LCL-iPSC/GEMMA eQTLs/GEMMATest")
 ipsc = read.table('iPSC.PC13.gemma.chosen.txt', header=F)
 LCL = read.table('LCL.PC8.gemma.chosen.txt', header=F)
 ipsc.genes = read.table('ENSGList.allgenes.Ordered.txt')
@@ -149,6 +149,8 @@ ipsc.genes.tested = read.table('iPSCGenesTested.txt')
 LCL.genes.tested = read.table('LCLGenesTested.txt')
 LCL.genes = read.table('LCLExpressedGenes.txt')
 colnames(ipsc.genes) = c("Gen_ID")
+library("extrafontdb", lib.loc="~/R/win-library/3.0")
+library("extrafont", lib.loc="~/R/win-library/3.0")
 
 
 ##Take only 5% BH filtered eQTLs from the Bonf corrected
@@ -297,19 +299,51 @@ colnames(shared.both) = c("ENSG", "iVariant", "ip", "iBonf", "iBeta", "iSe","iQv
 #write.table(shared.both, 'OverlappingeQTLs.txt', sep='\t', quote=F, row.names=F)
 
 #Create plot looking at effect size between iPSCs and LCLs
-pdf("B_SE_FullLCL.pdf")
-plot(density(abs(ipsc.eqtls$V5)), col = "Orange", main = "Distribution of Absolute Value of eQTL Effect Sizes Using LCL Subset", xlab = "Absolute Value of the Effect Size", lwd =2)
+LCL.f = read.table('LCLall.PC62.gemma.chosen.txt', header=F)
+LCL.qs = p.adjust(LCL.f$V4,method="BH")
+LCL.cor = cbind(LCL.f,LCL.qs)
+LCL.ef = LCL.cor[LCL.cor$LCL.qs <.05,]
+
+pdf("B_SE_eQTLs_garamond.pdf", family= "Garamond")
+plot(density(abs(ipsc.eqtls$V5)), col = "Orange", main = "Distribution of eQTL effect sizes", xlab = "Absolute Value of the Effect Size", lwd =2)
 lines(density(abs(LCL.eqtls$V5)), col = "Blue", lwd =2)
-cells = c("iPSCs", "LCLs")
-legend(1.25,8, cells, fill=c("orange", "blue"))
-abline(v=min(abs(LCL.eqtls$V5)))  
+lines(density(abs(LCL.ef$V5)), col = "green", lwd =2)
+cells = c("73 iPSCs", "73 LCLs", "431 LCLs")
+legend(1.1,8, cells, fill=c("orange", "blue", "green"))
+#abline(v=min(abs(LCL.eqtls$V5)))  
+mean(abs(ipsc.eqtls$V5))
+#0.1346031
+mean(abs(LCL.eqtls$V5))
+# 0.8298258
+mean(abs(LCL.ef$V5))
+# 0.3497963
+t.test(abs(ipsc.eqtls$V5),abs(LCL.eqtls$V5))
+t.test(abs(ipsc.eqtls$V5),abs(LCL.ef$V5))
 
-
-plot(density(abs(ipsc.eqtls$V6)), col = "Orange", main = "Distribution of SE for eQTLs Using LCL Subset", xlab = "Standard Error", lwd =2)
+plot(density(abs(ipsc.eqtls$V6)), col = "Orange", main = "Distribution of eQTL SE", xlab = "Standard Error", lwd =2, xlim=c(0,.32))
 lines(density(abs(LCL.eqtls$V6)), col = "Blue", lwd =2)
-cells = c("iPSCs", "LCLs")
-legend(.165,57, cells, fill=c("orange", "blue"))
+lines(density(abs(LCL.ef$V6)), col = "green", lwd =2)
+legend(.25,57, cells, fill=c("orange", "blue", "green"))
+mean(abs(ipsc.eqtls$V6))
+# 0.02115768
+mean(abs(LCL.eqtls$V6))
+# 0.1380964
+mean(abs(LCL.ef$V6))
+#0.05627177
+
+plot(density(abs(ipsc.eqtls$V5)/ipsc.eqtls$V6), col = "Orange", main = "Distribution of eQTL T statistics", xlab = "Absolute Value of the T Statistic", lwd =2, ylim=c(0,.5))
+lines(density(abs(LCL.eqtls$V5)/LCL.eqtls$V6), col = "Blue", lwd =2)
+lines(density(abs(LCL.ef$V5)/LCL.ef$V6), col = "green", lwd =2)
+legend(13.5,.4, cells, fill=c("orange", "blue", "green"))
 dev.off()
+mean(abs(ipsc.eqtls$V5)/ipsc.eqtls$V6)
+#6.160236
+mean(abs(LCL.eqtls$V5)/LCL.eqtls$V6)
+#6.11264
+mean(abs(LCL.ef$V5)/LCL.ef$V6)
+#6.27143
+
+t.test((abs(ipsc.eqtls$V5)/ipsc.eqtls$V6),(abs(LCL.ef$V5)/LCL.ef$V6))
 
 all=c()
 all = c(as.character(ipsc.both$V1))
@@ -323,16 +357,98 @@ make.venn.dual <- function(geneset1, geneset2, geneset1.label, geneset2.label, u
   univ$g2 <- univ$probes %in% geneset2
   venn.placeholder <- draw.pairwise.venn(length(geneset1),length(geneset2), dim(univ[univ$g1 == T & univ$g2 == T , ])[1], c(geneset1.label, geneset2.label), fill=c("goldenrod", "plum4"), alpha=c(0.5, 0.5),col=NA, euler.d=T)
   complement.size <- dim(univ[univ$g1 == F & univ$g2 == F , ])[1]
-  grid.text(paste(complement.size, "genes not an eQTL in either", sep=""), x=0.2, y=0.08)
+  grid.text(paste(complement.size, " genes not an eQTL in either", sep=""), x=0.2, y=0.08)
 }
 
 # Make venn
 dev.off()
-pdf('Venn_LCLsubset.pdf')
+pdf('Venn_LCLsubset_garamond.pdf', family= "Garamond")
 make.venn.dual(as.character(ipsc.eqtls$V1), as.character(LCL.eqtls$V1),"iPSC","LCL" ,univ)
 dev.off()
 
 
+##Make plot of effect size and SE from all tests
+setwd("C:/Users/Courtney/Dropbox/LCL-iPSC/GEMMA eQTLs/Final Data")
+ipsc = read.table('ipsc.PC13.gemma.eqtls.txt', header=F)
+LCL = read.table('LCL.PC8.gemma.eqtls.txt', header=F)
+
+pdf("B_SE_All_LCLSubset_garamond.pdf", family= "Garamond")
+plot(density(abs(ipsc$V4)), col = "Orange", main = "Distribution of effect size in 73 samples", xlab = "Absolute Value of the Effect Size", lwd =2)
+lines(density(abs(LCL$V4)), col = "Blue", lwd =2)
+cells = c("iPSCs", "LCLs")
+legend(1.25,85, cells, fill=c("orange", "blue"))
+#abline(v=min(abs(LCL.eqtls$V5)))  
+mean(abs(ipsc$V4))
+#0.016776
+mean(abs(LCL$V4))
+#0.1454126
+
+plot(density(ipsc$V5), col = "Orange", main = "Distribution of SE in 73 samples", xlab = "Standard Error", lwd =2)
+lines(density(LCL$V5), col = "Blue", lwd =2)
+cells = c("iPSCs", "LCLs")
+legend(.37,75, cells, fill=c("orange", "blue"))
+mean(ipsc$V5)
+# 0.01752999
+mean(LCL$V5)
+#0.1724701
+
+plot(density(abs(ipsc$V4)/ipsc$V5), col = "Orange", main = "Distribution of T statistic in 73 samples", xlab = "Absolute Value of the T Statistic", lwd =2, ylim = c(0,.8))
+lines(density(abs(LCL$V4)/LCL$V5), col = "Blue", lwd =2)
+cells = c("iPSCs", "LCLs")
+legend(14, .7, cells, fill=c("orange", "blue"))
+mean(abs(ipsc$V4)/ipsc$V5)
+# 0.9303271
+mean(abs(LCL$V4)/LCL$V5)
+# 0.852057
+#abline(v=min(abs(LCL.eqtls$V5)))  
+dev.off()
+
+##Make plot of effect size and SE from chosen
+setwd("C:/Users/Courtney/Dropbox/LCL-iPSC/GEMMA eQTLs/Final Data")
+ipsc = read.table('ipsc.PC13.gemma.chosen.txt', header=F)
+LCL = read.table('LCL.PC8.imputed.gemma.chosen.txt', header=F)
+LCL.f = read.table('LCLall.PC62.gemma.chosen.txt', header=F)
+
+#pdf("B_SE_Chosen_LCLSubset_garamond.pdf", family= "Garamond")
+pdf("B_SE_Chosen_garamond.pdf", family= "Garamond")
+#plot(density(abs(ipsc$V5)), col = "Orange", main = "Distribution of effect size in 73 samples", xlab = "Absolute Value of the Effect Size", lwd =2)
+plot(density(abs(ipsc$V5)), col = "Orange", main = "Distribution of effect size", xlab = "Absolute Value of the Effect Size", lwd =2)
+lines(density(abs(LCL$V5)), col = "Blue", lwd =2)
+lines(density(abs(LCL.f$V5)), col = "Green", lwd =2)
+cells = c("73 iPSCs", "73 LCLs", "431 LCLs")
+legend(1.0,19, cells, fill=c("orange", "blue", "green"))
+#abline(v=min(abs(LCL.eqtls$V5)))  
+mean(abs(ipsc$V5))
+#0.05488544
+mean(abs(LCL$V5))
+# 0.4654389
+#Full set 0.2028016
+ 
+#plot(density(ipsc$V6), col = "Orange", main = "Distribution of SE in 73 samples", xlab = "Standard Error", lwd =2)
+plot(density(ipsc$V6), col = "Orange", main = "Distribution of SE", xlab = "Standard Error", lwd =2)
+lines(density(LCL$V6), col = "Blue", lwd =2)
+lines(density(LCL.f$V6), col = "green", lwd =2)
+legend(.22,70, cells, fill=c("orange", "blue", "green"))
+mean(ipsc$V5)
+# 0.0004829059
+mean(LCL$V5)
+# 0.01475375
+mean(LCL.f$V5)
+#0.00418144
+
+#plot(density(abs(ipsc$V5)/ipsc$V6), col = "Orange", main = "Distribution of T statistic in 73 samples", xlab = "Absolute Value of the T Statistic", lwd =2, ylim = c(0,.7))
+plot(density(abs(ipsc$V5)/ipsc$V6), col = "Orange", main = "Distribution of T statistics", xlab = "Absolute Value of the T Statistic", lwd =2, ylim = c(0,.7))
+lines(density(abs(LCL$V5)/LCL$V6), col = "Blue", lwd =2)
+lines(density(abs(LCL.f$V5)/LCL.f$V6), col = "green", lwd =2)
+legend(12, .6, cells, fill=c("orange", "blue", "green"))
+mean(abs(ipsc$V5)/ipsc$V6)
+#  3.191851
+mean(abs(LCL$V5)/LCL$V6)
+# 2.764302
+mean(abs(LCL.f$V5)/LCL.f$V6)
+# 3.420287
+
+dev.off()
 
 #############
 ###Re-do everything with full LCL set
@@ -344,6 +460,8 @@ ipsc.genes.tested = read.table('iPSCGenesTested.txt')
 LCL.genes.tested = read.table('LCLGenesTested.txt')
 LCL.genes = read.table('LCLExpressedGenes.txt')
 #colnames(ipsc.genes) = c("Gen_ID")
+library("extrafontdb", lib.loc="~/R/win-library/3.0")
+library("extrafont", lib.loc="~/R/win-library/3.0")
 
 
 ##Take only 5% BH filtered eQTLs from the Bonf corrected
@@ -389,9 +507,9 @@ expr.both = which(LCL.only.tested.eqtls$V1 %in% ipsc.genes$V1)
 
 LCL.only.tested.expressed.eqtls = LCL.only.tested.eqtls[expr.both,]
 
-iPSC.noteQTL = which(ipsc.both$V1 %in% ipsc.only.tested.expressed.eqtls$V1)
-ipsc.not = ipsc.both[-iPSC.noteQTL,]
-write.table(ipsc.not$V1, 'NoniPSC.eQTLs.txt',quote=F, row.names=F, sep='\t', col.names=F)
+# iPSC.noteQTL = which(ipsc.both$V1 %in% ipsc.only.tested.expressed.eqtls$V1)
+# ipsc.not = ipsc.both[-iPSC.noteQTL,]
+# write.table(ipsc.not$V1, 'NoniPSC.eQTLs.txt',quote=F, row.names=F, sep='\t', col.names=F)
 
 ##Do permutation for overall overlap
 #First subset only genes that were tested and expressed in both tissues
@@ -495,22 +613,24 @@ colnames(shared.both) = c("ENSG", "iVariant", "ip", "iBonf", "iBeta", "iSe","iQv
 write.table(shared.both, 'OverlappingeQTLs_FullLCL.txt', sep='\t', quote=F, row.names=F)
 
 #Create plot looking at effect size between iPSCs and LCLs
-pdf("B_SE_FullLCL.pdf")
-plot(density(abs(ipsc.eqtls$V5)), col = "Orange", main = "Distribution of Absolute Value of eQTL Effect Sizes Using Full LCL Set", xlab = "Absolute Value of the Effect Size", lwd =2)
-lines(density(abs(LCL.eqtls$V5)), col = "Blue", lwd =2)
-cells = c("iPSCs", "LCLs")
-legend(1.25,8, cells, fill=c("orange", "blue"))
-abline(v=min(abs(LCL.eqtls$V5)))  
+# pdf("B_SE_FullLCL.pdf")
+# plot(density(abs(ipsc.eqtls$V5)), col = "Orange", main = "Distribution of Absolute Value of eQTL Effect Sizes Using Full LCL Set", xlab = "Absolute Value of the Effect Size", lwd =2)
+# lines(density(abs(LCL.eqtls$V5)), col = "Blue", lwd =2)
+# cells = c("iPSCs", "LCLs")
+# legend(1.25,8, cells, fill=c("orange", "blue"))
+# abline(v=min(abs(LCL.eqtls$V5)))  
+# 
+# 
+# plot(density(abs(ipsc.eqtls$V6)), col = "Orange", main = "Distribution of SE for eQTLs Using Full LCL Set", xlab = "Standard Error", lwd =2)
+# lines(density(abs(LCL.eqtls$V6)), col = "Blue", lwd =2)
+# cells = c("iPSCs", "LCLs")
+# legend(.165,57, cells, fill=c("orange", "blue"))
+# dev.off()
 
-
-plot(density(abs(ipsc.eqtls$V6)), col = "Orange", main = "Distribution of SE for eQTLs Using Full LCL Set", xlab = "Standard Error", lwd =2)
-lines(density(abs(LCL.eqtls$V6)), col = "Blue", lwd =2)
-cells = c("iPSCs", "LCLs")
-legend(.165,57, cells, fill=c("orange", "blue"))
-dev.off()
-
+expr.tested.both = which(LCL.genes$V1 %in% ipsc.genes$V1)
+e.t.b = as.matrix(ipsc.genes[expr.tested.both,])
 all=c()
-all = c(as.character(ipsc.both$V1))
+all = as.character(e.t.b[,1])
 all = unique(all)
 univ <- data.frame(all)
 library(VennDiagram)
@@ -521,11 +641,44 @@ make.venn.dual <- function(geneset1, geneset2, geneset1.label, geneset2.label, u
   univ$g2 <- univ$probes %in% geneset2
   venn.placeholder <- draw.pairwise.venn(length(geneset1),length(geneset2), dim(univ[univ$g1 == T & univ$g2 == T , ])[1], c(geneset1.label, geneset2.label), fill=c("goldenrod", "plum4"), alpha=c(0.5, 0.5),col=NA, euler.d=T)
   complement.size <- dim(univ[univ$g1 == F & univ$g2 == F , ])[1]
-  grid.text(paste(complement.size, "genes not an eQTL in either", sep=""), x=0.2, y=0.08)
+  grid.text(paste(complement.size, " genes not an eQTL in either", sep=""), x=0.2, y=0.08)
 }
 
 # Make venn
 dev.off()
-pdf('Venn_FullLCL.pdf')
+pdf('Venn_Template_FullLCL.pdf', family="Garamond")
 make.venn.dual(as.character(ipsc.eqtls$V1), as.character(LCL.eqtls$V1),"iPSC","LCL" ,univ)
 dev.off()
+
+
+all=c()
+all = append(as.character(LCL.genes.tested$V1), as.character(ipsc.genes.tested$V1))
+all = unique(all)
+univ <- data.frame(all)
+library(VennDiagram)
+names(univ) <- "probes"
+
+make.venn.dual <- function(geneset1, geneset2, geneset1.label, geneset2.label, univ){
+  univ$g1 <- univ$probes %in% geneset1
+  univ$g2 <- univ$probes %in% geneset2
+  venn.placeholder <- draw.pairwise.venn(length(geneset1),length(geneset2), dim(univ[univ$g1 == T & univ$g2 == T , ])[1], c(geneset1.label, geneset2.label), fill=c("goldenrod", "plum4"), alpha=c(0.5, 0.5),col=NA, euler.d=T)
+  complement.size <- dim(univ[univ$g1 == F & univ$g2 == F , ])[1]
+  grid.text(paste(complement.size, " genes not an eQTL in either", sep=""), x=0.2, y=0.08)
+}
+
+# Make venn
+dev.off()
+pdf('Venn_AllGenes_FullLCL.pdf')
+make.venn.dual(as.character(ipsc.only.tested.eqtls$V1), as.character(LCL.only.tested.eqtls$V1),"iPSC","LCL" ,univ)
+dev.off()
+
+pdf('EffectSize_Tstat_Head2HeadPlot.pdf', family="Garamond")
+shared.both.total = merge(shared.eqtls, shared.eqtls.LCL, by.x = c("V1","V2"), by.y = c("V1", "V2"))
+plot(shared.both.total$V5.x, shared.both.total$V5.y, pch=20, main = "Effect size of shared eQTLs for same gene-SNP pair", xlab = "iPSC Effect Size", ylab= "LCL Effect Size")
+abline(v=0,h=0)
+plot((shared.both.total$V5.x/shared.both.total$V6.x), (shared.both.total$V5.y/shared.both.total$V6.y), pch=20, main = "T statistic of shared eQTLs for same gene-SNP pair", xlab = "iPSC T Statistic", ylab= "LCL T Statistic", xlim=c(-15,15), ylim=c(-15,15))
+abline(v=0,h=0)
+abline(0,1, lty=3)
+dev.off()
+cor(shared.both.total$V5.x, shared.both.total$V5.y)
+cor((shared.both.total$V5.x/shared.both.total$V6.x), (shared.both.total$V5.y/shared.both.total$V6.y))
