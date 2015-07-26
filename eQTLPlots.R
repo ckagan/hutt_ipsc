@@ -75,12 +75,12 @@ beeswarm(eqtl.loc~eqtl.geno, add=T, col= "black", vertical=T,pch=20)
 
 eqtl.loc = as.matrix(exprs.o.t[,which(colnames(exprs.o.t) == "ENSG00000146833")])
 eqtl.geno = as.matrix(geno.i.t[which(rownames(geno.i.t) == "rs2571997_A"),])
-boxplot(eqtl.loc~eqtl.geno, main = expression(paste(italic("TRIM4")," Expression in iPSCs")),col=(c("orange", "lightgreen", "lightblue")), xlab = "Genotype (Number of Minor Alleles)", ylab = "Gene Expression")#, xlim =c(0,7), at = 1:3*1, xaxt = "n", ylim = c(-1.5,1.5))
+boxplot(eqtl.loc~eqtl.geno, main = expression(paste(italic("TRIM4")," Expression in iPSCs")),col=(c("orange", "lightgreen", "lightblue")), xlab = "Genotype (Number of Minor Alleles)", ylab = "Gene Expression", ylim=c(-2,3))#, xlim =c(0,7), at = 1:3*1, xaxt = "n", ylim = c(-1.5,1.5))
 beeswarm(eqtl.loc~eqtl.geno, add=T, col="black", vertical=T,pch=20)
 
 eqtl.loc = as.matrix(dc.exprs[,which(colnames(dc.exprs) == "ENSG00000146833")])
 eqtl.geno = as.matrix(geno.l.t[which(rownames(geno.l.t) == "rs2571997_A"),])
-boxplot(eqtl.loc~eqtl.geno, main = expression(paste(italic("TRIM4")," Expression in LCLs")),col=(c("orange", "lightgreen", "lightblue")),xlab = "Genotype (Number of Minor Alleles)", ylab = "Gene Expression")#, add=T, at = 4:6*1, xaxt = "n")
+boxplot(eqtl.loc~eqtl.geno, main = expression(paste(italic("TRIM4")," Expression in LCLs")),col=(c("orange", "lightgreen", "lightblue")),xlab = "Genotype (Number of Minor Alleles)", ylab = "Gene Expression", ylim = c(-2,3))#, add=T, at = 4:6*1, xaxt = "n")
 beeswarm(eqtl.loc~eqtl.geno, add=T, col= "black", vertical=T,pch=20) #, at = 4:6*1)
 dev.off()
 

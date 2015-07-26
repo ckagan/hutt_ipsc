@@ -52,10 +52,12 @@ colnames(effectsize) = c('All', 'iPSC_Tested_Only', 'iPSC_eQTLs_Only')
 eqtls[15] = "LCLFullSet"
 eqtls[14] = "LCLSubset"
 eqtls[16] = "iPSC"
+eqtls[17] = "YRILCLs"
 
 count[14]= "LCL.S.eqtls"
 count[15]= "LCL.F.eqtls"
 count[16]= "iPSC"
+count[17] = "YRILCLs"
 
 LCL.f = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/DCFull/eQTLs/master.PC62.eqtls.txt', as.is=T, skip=1)
 sgenes = which(LCL.f$V1 %in% igenes$V1)
@@ -76,6 +78,9 @@ LCL.S.eqtls = abs(LCL.S$V5)
 ipsc = read.table('/mnt/gluster/data/internal_supp/hutt_ipsc/AllGenesNoPCs/eQTLs/master.PC13.eqtls.txt', as.is=T, skip=1)
 iPSC = abs(ipsc$V5)
 
+yri = read.table('/mnt/lustre/home/nbanovich/Array.eQTL.effectsize.test/Output/sig.at.FDR.10.txt', as.is=T)
+YRILCLs= abs(yri$V1)
+
 dataList <- lapply(eqtls, get, envir=environment())
 names(dataList) = eqtls
 
@@ -85,8 +90,8 @@ names(dataL) = count
 library(ggplot2)
 ggplot(dataList, aes(x=cond, y=rating, fill=cond)) + geom_boxplot()
 
-pdf("EffectSize_GTEx.pdf")
-colors = c("lightgreen", "lightgreen","lightgreen", "lightgreen","lightgreen", "lightgreen","lightgreen", "lightgreen","lightgreen", "lightgreen","lightgreen", "lightgreen","lightgreen", "lightblue","orange","grey")
+pdf("EffectSize_GTEx_withYRI.pdf")
+colors = c("lightgreen", "lightgreen","lightgreen", "lightgreen","lightgreen", "lightgreen","lightgreen", "lightgreen","lightgreen", "lightgreen","lightgreen", "lightgreen","lightgreen", "lightblue","orange","grey", "lightpink")
 boxplot(dataList, col= colors)
 boxplot(dataL, col= colors)
 dev.off()
