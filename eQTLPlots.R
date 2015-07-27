@@ -25,7 +25,7 @@ rownames(PC1_13.residual) = rownames(exprs.ordered)
 colnames(PC1_13.residual) = colnames(exprs.ordered)
 for (i in 1:nrow(exprs.ordered)) {
   model= lm(exprs.ordered[i,]~ x.pca$x[,1:13])
-  PC1_13.residual[i,] = resid(model) #+model$coefficients[1]
+  PC1_13.residual[i,] = resid(model) +model$coefficients[1]
 }
 
 exprs.o.t = t(PC1_13.residual)
@@ -49,10 +49,13 @@ PC1_62.residual = matrix(nrow= nrow(dc.exprs.2), ncol = ncol(dc.exprs.2))
 rownames(PC1_62.residual) = rownames(dc.exprs.2)
 for (i in 1:nrow(dc.exprs.2)) {
   model= lm(dc.exprs.2[i,]~ d.pca$x[,1:62])
-  PC1_62.residual[i,] = resid(model) #+model$coefficients[1]
+  PC1_62.residual[i,] = resid(model) +model$coefficients[1]
 }
 
 dc.exprs = t(PC1_62.residual)
+
+mean(var(PC1_13.residual))
+mean(var(PC1_62.residual))
 
 #Load in dc geno
 geno.l = read.table('C:/Users/Courtney/Dropbox/LCL-iPSC/GEMMA eQTLs/Final Data/LCLall.eqtlgenotypes.raw', header=T, as.is=T, sep='\t')

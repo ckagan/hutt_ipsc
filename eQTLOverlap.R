@@ -672,9 +672,18 @@ pdf('Venn_AllGenes_FullLCL.pdf')
 make.venn.dual(as.character(ipsc.only.tested.eqtls$V1), as.character(LCL.only.tested.eqtls$V1),"iPSC","LCL" ,univ)
 dev.off()
 
+
+plot(density(abs(ipsc.only.tested.eqtls$V5)), col = "Orange", main = "Distribution of eQTL Effect Sizes", xlab = "Effect Size", lwd =2)
+lines(density(abs(shared.eqtls$V5)), col = "Blue", lwd =2)
+cells = c("iPSC-Specific", "Shared")
+legend(1,8, cells, fill=c("orange", "blue"))
+t.test(abs(ipsc.only.tested.eqtls$V5), abs(shared.eqtls$V5))
+# P = 0.01548
+
+##Effect size head 2 head plot 
 pdf('EffectSize_Tstat_Head2HeadPlot.pdf', family="Garamond")
 shared.both.total = merge(shared.eqtls, shared.eqtls.LCL, by.x = c("V1","V2"), by.y = c("V1", "V2"))
-plot(shared.both.total$V5.x, shared.both.total$V5.y, pch=20, main = "Effect size of shared eQTLs for same gene-SNP pair", xlab = "iPSC Effect Size", ylab= "LCL Effect Size")
+plot(shared.both.total$V5.x, shared.both.total$V5.y, pch=20, main = "Effect size of shared eQTLs for same gene-SNP pair", xlab = "iPSC Effect Size", ylab= "LCL Effect Size", ylim = c(-1.1,1.1), xlim = c(-1.1,1.1))
 abline(v=0,h=0)
 plot((shared.both.total$V5.x/shared.both.total$V6.x), (shared.both.total$V5.y/shared.both.total$V6.y), pch=20, main = "T statistic of shared eQTLs for same gene-SNP pair", xlab = "iPSC T Statistic", ylab= "LCL T Statistic", xlim=c(-15,15), ylim=c(-15,15))
 abline(v=0,h=0)
